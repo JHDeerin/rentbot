@@ -3,6 +3,7 @@
 A quick script to create a GroupMe bot and have it send a reminder message to
 our apartment's GroupMe about the rent
 '''
+from datetime import datetime
 import os
 
 import requests
@@ -49,6 +50,12 @@ def sendBotMessage(botID: str, message: str):
     return result.text
 
 
+def is1stDayOfMonth():
+    time = datetime.utcnow()
+    return time.day == 1
+
+
 if __name__ == '__main__':
-    print(sendBotMessage(BOT_ID, REMINDER_MESSAGE))
+    if is1stDayOfMonth():
+        print(sendBotMessage(BOT_ID, REMINDER_MESSAGE))
     # print(listGroups(TOKEN))
