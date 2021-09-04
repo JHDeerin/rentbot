@@ -194,7 +194,47 @@ class UtilityAmtCommand(BotCommand):
         googleSheetConnection.setTotalUtility(totalUtility, time)
 
         monthStr = time.strftime('%B')
-        sendBotMessage(BOT_ID, f'@{userName} set the total utility cost for {monthStr} {time.year} at ${totalUtility:.2f}')
+        sendBotMessage(BOT_ID, f'@{userName} set the total utility cost for {monthStr} {time.year} to ${totalUtility:.2f}')
+
+
+class WeeksStayedCommand(BotCommand):
+    def __init__(self):
+        super().__init__()
+        self.name = 'weeks-stayed'
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        # TODO: Try to reuse this pattern?
+        self.parseWeeksRegex = re.compile(f'{self.cmdRegex.pattern}\s+(\d*\.?\d+)')
+
+    def execute(self, userInput: str, userName: str=''):
+        matches = self.parseWeeksRegex.search(userInput)
+        if not matches:
+            sendBotMessage(BOT_ID, f'Hmmm, I couldn\'t read how many weeks that was (did you include it like "/rent weeks-stayed 4"?)')
+            return
+
+        weeksStr = matches.group(1)
+        weeks = float(weeksStr)
+        print(weeks)
+        time = getDefaultTimeForCommand()
+        googleSheetConnection.setWeeksStayed(weeks, userName, time)
+
+        monthStr = time.strftime('%B')
+        sendBotMessage(BOT_ID, f'@{userName} stayed for {weeksStr} weeks in {monthStr} {time.year}')
+
+
+class ShowCommand(BotCommand):
+    def __init__(self):
+        super().__init__()
+        self.name = 'show'
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+
+    def execute(self, userInput: str, userName: str=''):
+        amountsOwed = googleSheetConnection.getAmountsOwed()
+        if amountsOwed:
+            owedStrings = "\n".join(sorted([f'@{name}: ${amt:.2f}' for name, amt in amountsOwed.items()]))
+        else:
+            owedStrings = '...hmmm, I\'m not sure who\'s paying rent right now (have you run "/rent add" to add yourself?)'
+        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo $ to @Mac-Mathis-1\nSpreadsheet for audits: https://docs.google.com/spreadsheets/d/1_vVMk4uQ5vwX589MVU-wxRB-SgQORhfzybFjHk6WdlE/edit?usp=sharing'
+        sendBotMessage(BOT_ID, fullMessage)
 
 
 @app.route('/', methods=['POST'])
@@ -214,7 +254,9 @@ def parseGroupMeMessage():
         RemoveCommand(),
         PaidCommand(),
         RentAmtCommand(),
-        UtilityAmtCommand()
+        UtilityAmtCommand(),
+        WeeksStayedCommand(),
+        ShowCommand()
     ]
     for cmd in commands:
         if cmd.isCommand(msgText):

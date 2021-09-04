@@ -355,3 +355,72 @@ class GoogleSheet():
         sheetUpdates = []
         sheetUpdates += self._updateMonthBlockData(monthData)
         self._wksheet.batch_update(sheetUpdates)
+
+    def setWeeksStayed(self, weeks: float, tenantName: str, time: datetime):
+        '''
+        Sets the total utility cost for the given month
+
+        Basic algorithm:
+        1) Check if the user exists in initial data; if they don't, exit
+        2) Check if the given month exists; if it doesn't, create it
+        3) Update the month data to include how many weeks they stayed
+        '''
+        allRows = self._getAllRows()
+        currentTenants = self._getCurrentTenantData(allRows)
+        if tenantName not in currentTenants:
+            return
+
+        monthData = self._getMonthBlockData(allRows, time)
+        if not monthData:
+            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            allRows = self._getAllRows()
+            monthData = self._getMonthBlockData(allRows, time)
+
+        monthData.tenants[tenantName].weeksStayed = weeks
+
+        sheetUpdates = []
+        sheetUpdates += self._updateMonthBlockData(monthData)
+        self._wksheet.batch_update(sheetUpdates)
+
+    def _getAmountsOwedForMonth(self, monthData: MonthData) -> typing.Dict[str, float]:
+        totalWeeksStayed = sum(map(lambda x: x.weeksStayed, monthData.tenants.values()))
+        # Prevent division by 0 error (totals will still be 0)
+        if totalWeeksStayed == 0:
+            totalWeeksStayed += 1
+        totalCost = monthData.totalRent + monthData.totalUtility
+
+        amountsOwed = {}
+        for tenant in monthData.tenants.values():
+            amountsOwed[tenant.name] = totalCost * (tenant.weeksStayed / totalWeeksStayed)
+        return amountsOwed
+
+    def getAmountsOwed(self) -> typing.Dict[str, float]:
+        '''
+        Returns a dictionary of how much all the current tenants owe
+
+        Basic algorithm:
+        1) Load all the current tenants; if there are none, return an empty dict
+        2) Get all the months that haven't been paid for and load their data
+        3) For each of them, calculate how much each person owes and add it to
+        the total (if everyone's paid up, this'll be 0.0 for everyone)
+        4) Return the totals
+        '''
+        allRows = self._getAllRows()
+        currentTenants = self._getCurrentTenantData(allRows)
+        if not currentTenants:
+            return {}
+
+        monthsOwed = set()
+        for tenant in currentTenants.values():
+            monthsOwed = monthsOwed.union(set(tenant.monthsUnpaid))
+
+        amountsOwed = {name: 0.0 for name in currentTenants}
+        for month in monthsOwed:
+            monthData = self._getMonthBlockData(allRows, month)
+            monthAmountsOwed = self._getAmountsOwedForMonth(monthData)
+            for tenant in amountsOwed:
+                if tenant not in monthAmountsOwed:
+                    continue
+                amountsOwed[tenant] += monthAmountsOwed[tenant]
+
+        return amountsOwed
