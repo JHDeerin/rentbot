@@ -98,15 +98,20 @@ class GoogleSheet():
             i += 1
         return dataRows
 
+    def _monthDataExists(self, allRows: typing.List[list], time: datetime) -> bool:
+        startRow = self._getMonthStartRow(time)
+        startRowIndex = startRow - 1
+        return startRowIndex < len(allRows) and allRows[startRowIndex][0]
+
     def _getMonthBlockData(self, allRows: typing.List[list], time: datetime) -> MonthData:
         '''
         Gets the whole block of data for the given month from the sheet; can
         then parse that data for individual rent payer info
         '''
-        startRowIndex = self._getMonthStartRow(time) - 1
-        if startRowIndex >= len(allRows):
+        if not self._monthDataExists(allRows, time):
             return None
-        # TODO: Implement this!
+
+        startRowIndex = self._getMonthStartRow(time) - 1
         totalRent = float(allRows[startRowIndex + 1][1])
         totalUtility = float(allRows[startRowIndex + 2][1])
 
@@ -132,11 +137,6 @@ class GoogleSheet():
                     monthsUnpaid.append(self._parseMonthYearString(timeStr))
             initialTenants[name] = CurrentTenant(name, monthsUnpaid)
         return initialTenants
-
-    def _monthDataExists(self, allRows: typing.List[list], time: datetime) -> bool:
-        startRow = self._getMonthStartRow(time)
-        startRowIndex = startRow - 1
-        return startRowIndex < len(allRows) and allRows[startRowIndex][0]
 
     def _updateCurrentTenantsData(self, newData: typing.Dict[str, CurrentTenant]) -> typing.List[dict]:
         '''
@@ -311,5 +311,47 @@ class GoogleSheet():
 
         sheetUpdates = []
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
+        sheetUpdates += self._updateMonthBlockData(monthData)
+        self._wksheet.batch_update(sheetUpdates)
+
+    def setTotalRent(self, totalRent: float, time: datetime):
+        '''
+        Sets the total rent for the given month
+
+        Basic algorithm:
+        1) Check if the month exists in the data; if it doesn't, create it
+        2) Update the month data to include the rent amt
+        '''
+        allRows = self._getAllRows()
+        monthData = self._getMonthBlockData(allRows, time)
+        if not monthData:
+            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            allRows = self._getAllRows()
+            monthData = self._getMonthBlockData(allRows, time)
+
+        monthData.totalRent = totalRent
+
+        sheetUpdates = []
+        sheetUpdates += self._updateMonthBlockData(monthData)
+        self._wksheet.batch_update(sheetUpdates)
+
+    def setTotalUtility(self, totalUtility: float, time: datetime):
+        '''
+        Sets the total utility cost for the given month
+
+        Basic algorithm:
+        1) Check if the month exists in the data; if it doesn't, create it
+        2) Update the month data to include the utility amt
+        '''
+        allRows = self._getAllRows()
+        monthData = self._getMonthBlockData(allRows, time)
+        if not monthData:
+            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            allRows = self._getAllRows()
+            monthData = self._getMonthBlockData(allRows, time)
+
+        monthData.totalUtility = totalUtility
+
+        sheetUpdates = []
         sheetUpdates += self._updateMonthBlockData(monthData)
         self._wksheet.batch_update(sheetUpdates)

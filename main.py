@@ -110,7 +110,7 @@ class HelpCommand(BotCommand):
     def __init__(self):
         super().__init__()
         self.name = 'help'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}help')
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
 
     def execute(self, userInput: str, userName: str=''):
         pass
@@ -121,7 +121,7 @@ class AddCommand(BotCommand):
     def __init__(self):
         super().__init__()
         self.name = 'add'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}add')
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
 
     def execute(self, userInput: str, userName: str=''):
         googleSheetConnection.addTenant(userName, getDefaultTimeForCommand())
@@ -132,7 +132,7 @@ class RemoveCommand(BotCommand):
     def __init__(self):
         super().__init__()
         self.name = 'remove'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}remove')
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
 
     def execute(self, userInput: str, userName: str=''):
         googleSheetConnection.removeTenant(userName, getDefaultTimeForCommand())
@@ -143,13 +143,58 @@ class PaidCommand(BotCommand):
     def __init__(self):
         super().__init__()
         self.name = 'paid'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}paid')
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
 
     def execute(self, userInput: str, userName: str=''):
         time = getDefaultTimeForCommand()
         googleSheetConnection.markRentAsPaid(userName, time)
         monthStr = time.strftime('%B')
         sendBotMessage(BOT_ID, f'@{userName} paid the rent for {monthStr} {time.year}')
+
+
+class RentAmtCommand(BotCommand):
+    def __init__(self):
+        super().__init__()
+        self.name = 'rent-amt'
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        self.parseCostRegex = re.compile(f'{self.cmdRegex.pattern}\s+\$?(\d*\.?\d+)')
+
+    def execute(self, userInput: str, userName: str=''):
+        matches = self.parseCostRegex.search(userInput)
+        if not matches:
+            sendBotMessage(BOT_ID, f'Hmmm, I couldn\'t read that amount (did you include it like "/rent rent-amt $1234.00"?)')
+            return
+
+        totalRent = float(matches.group(1))
+        print(totalRent)
+        time = getDefaultTimeForCommand()
+        googleSheetConnection.setTotalRent(totalRent, time)
+
+        monthStr = time.strftime('%B')
+        sendBotMessage(BOT_ID, f'@{userName} set the total bill for {monthStr} {time.year} at ${totalRent:.2f}')
+
+
+class UtilityAmtCommand(BotCommand):
+    def __init__(self):
+        super().__init__()
+        self.name = 'utility-amt'
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        # TODO: Try to reuse this pattern?
+        self.parseCostRegex = re.compile(f'{self.cmdRegex.pattern}\s+\$?(\d*\.?\d+)')
+
+    def execute(self, userInput: str, userName: str=''):
+        matches = self.parseCostRegex.search(userInput)
+        if not matches:
+            sendBotMessage(BOT_ID, f'Hmmm, I couldn\'t read that amount (did you include it like "/rent utility-amt $1234.00"?)')
+            return
+
+        totalUtility = float(matches.group(1))
+        print(totalUtility)
+        time = getDefaultTimeForCommand()
+        googleSheetConnection.setTotalUtility(totalUtility, time)
+
+        monthStr = time.strftime('%B')
+        sendBotMessage(BOT_ID, f'@{userName} set the total utility cost for {monthStr} {time.year} at ${totalUtility:.2f}')
 
 
 @app.route('/', methods=['POST'])
@@ -167,7 +212,9 @@ def parseGroupMeMessage():
         HelpCommand(),
         AddCommand(),
         RemoveCommand(),
-        PaidCommand()
+        PaidCommand(),
+        RentAmtCommand(),
+        UtilityAmtCommand()
     ]
     for cmd in commands:
         if cmd.isCommand(msgText):
