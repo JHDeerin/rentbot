@@ -113,8 +113,7 @@ class HelpCommand(BotCommand):
         self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
 
     def execute(self, userInput: str, userName: str=''):
-        pass
-        # sendBotMessage(BOT_ID, HELP_MESSAGE)
+        sendBotMessage(BOT_ID, HELP_MESSAGE)
 
 
 class AddCommand(BotCommand):
