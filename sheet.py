@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
+import json
 import os
 import typing
 
@@ -7,6 +8,7 @@ import gspread
 
 
 SHEETS_KEY_PATH = os.environ.get('RENTBOT_GSHEETS_KEY_PATH')
+SHEETS_KEY = os.environ.get('RENTBOT_GSHEETS_KEY')
 SHEETS_URL = os.environ['RENTBOT_GSHEETS_URL']
 
 
@@ -64,7 +66,11 @@ class GoogleSheet():
         self.MAX_USERS = 20
         self.MONTH_BLOCK_SIZE = 25 # allocate 25 rows to each month
 
-        self._connection = gspread.service_account(filename=SHEETS_KEY_PATH)
+        if SHEETS_KEY_PATH:
+            self._connection = gspread.service_account(filename=SHEETS_KEY_PATH)
+        else:
+            key = json.loads(SHEETS_KEY)
+            self._connection = gspread.service_account_from_dict(key)
         self._sheet = self._connection.open_by_url(SHEETS_URL)
         self._wksheet = self._sheet.sheet1
 
