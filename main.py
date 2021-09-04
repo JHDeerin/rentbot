@@ -272,4 +272,4 @@ if __name__ == '__main__':
     if is1stDayOfMonth():
         # TODO: Update this to make sure it only sends the reminder once
         print(sendBotMessage(BOT_ID, REMINDER_MESSAGE))
-    app.run(debug=True, port=5000)
+    app.run(threaded=True, port=5000)
