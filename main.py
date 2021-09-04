@@ -139,6 +139,19 @@ class RemoveCommand(BotCommand):
         sendBotMessage(BOT_ID, f'Removed @{userName} from the rent roll')
 
 
+class PaidCommand(BotCommand):
+    def __init__(self):
+        super().__init__()
+        self.name = 'paid'
+        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}paid')
+
+    def execute(self, userInput: str, userName: str=''):
+        time = getDefaultTimeForCommand()
+        googleSheetConnection.markRentAsPaid(userName, time)
+        monthStr = time.strftime('%B')
+        sendBotMessage(BOT_ID, f'@{userName} paid the rent for {monthStr} {time.year}')
+
+
 @app.route('/', methods=['POST'])
 def parseGroupMeMessage():
     bodyJSON = flask.request.get_json()
@@ -153,7 +166,8 @@ def parseGroupMeMessage():
     commands = [
         HelpCommand(),
         AddCommand(),
-        RemoveCommand()
+        RemoveCommand(),
+        PaidCommand()
     ]
     for cmd in commands:
         if cmd.isCommand(msgText):

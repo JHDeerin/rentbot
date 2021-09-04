@@ -128,7 +128,8 @@ class GoogleSheet():
             monthsUnpaid = []
             timeStrings = str(row[1]).strip().split(',')
             for timeStr in timeStrings:
-                monthsUnpaid.append(self._parseMonthYearString(timeStr))
+                if timeStr:
+                    monthsUnpaid.append(self._parseMonthYearString(timeStr))
             initialTenants[name] = CurrentTenant(name, monthsUnpaid)
         return initialTenants
 
@@ -281,6 +282,32 @@ class GoogleSheet():
         monthData = self._getMonthBlockData(allRows, time)
         if tenantName in monthData.tenants:
             del monthData.tenants[tenantName]
+
+        sheetUpdates = []
+        sheetUpdates += self._updateCurrentTenantsData(currentTenants)
+        sheetUpdates += self._updateMonthBlockData(monthData)
+        self._wksheet.batch_update(sheetUpdates)
+
+    def markRentAsPaid(self, tenantName: str, time: datetime):
+        '''
+        Marks the given person as having paid the rent for the month
+
+        Basic algorithm:
+        1) Check if the user exists in the initial data; if they don't, exit
+        2) Mark them as having paid for that month
+        3) Remove the month as being unpaid from the initial data
+        '''
+        allRows = self._getAllRows()
+        currentTenants = self._getCurrentTenantData(allRows)
+        if tenantName not in currentTenants:
+            return
+
+        currentTenants[tenantName].monthsUnpaid = list(filter(
+            lambda t: t.year != time.year and t.month != time.month,
+            currentTenants[tenantName].monthsUnpaid))
+        monthData = self._getMonthBlockData(allRows, time)
+        if tenantName in monthData.tenants:
+            monthData.tenants[tenantName].isPaid = True
 
         sheetUpdates = []
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
