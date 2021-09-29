@@ -16,7 +16,7 @@ from sheet import GoogleSheet
 
 TOKEN = os.environ.get('GROUPME_TOKEN')
 BOT_ID = os.environ['GROUPME_BOT_ID']
-REMINDER_MESSAGE = "It's RENT TIME again for the month!\n\nFill out how long you stayed this past month in the spreadsheet, and pay @Mac Mathis in a few days when your bill is posted: https://docs.google.com/spreadsheets/d/1jwI4B1ZO46nY0fOVBfB21IFQ-HjngvK63HquskJsMJ0/edit#gid=168056278"
+REMINDER_MESSAGE = 'It\'s RENT TIME again for the month!\n\nPlease type "/rent weeks-stayed <num weeks>" to set how long you stayed this past month. In a few days, rents will be posted and you can type "/rent show" to see how much you owe @Mac Mathis'
 HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>" (without the quotes); here're the available commands:
 
 "/rent show"
@@ -78,11 +78,6 @@ def sendBotMessage(botID: str, message: str):
     }
     result = requests.post('https://api.groupme.com/v3/bots/post', json=body)
     return result.text
-
-
-def is1stDayOfMonth() -> bool:
-    time = datetime.utcnow()
-    return time.day == 1
 
 
 def getDefaultTimeForCommand() -> datetime:
@@ -267,8 +262,15 @@ def parseGroupMeMessage():
     return f'Unrecognized command "{msgText}"', 400
 
 
+@app.route('/reminder')
+def remindGroup():
+    '''
+    Posts a reminder to pay the rent to the GroupMe
+    '''
+    print('Received reminder request')
+    sendBotMessage(BOT_ID, REMINDER_MESSAGE)
+    return 'Reminder message sent', 200
+
+
 if __name__ == '__main__':
-    if is1stDayOfMonth():
-        # TODO: Update this to make sure it only sends the reminder once
-        print(sendBotMessage(BOT_ID, REMINDER_MESSAGE))
     app.run(threaded=True, port=5000)
