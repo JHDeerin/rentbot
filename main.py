@@ -223,6 +223,7 @@ class ShowCommand(BotCommand):
 
     def execute(self, userInput: str, userName: str=''):
         amountsOwed = googleSheetConnection.getAmountsOwed()
+        print(f'Amounts owed: {amountsOwed}')
         if amountsOwed:
             owedStrings = "\n".join(sorted([f'@{name}: ${amt:.2f}' for name, amt in amountsOwed.items()]))
         else:

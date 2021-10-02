@@ -390,7 +390,8 @@ class GoogleSheet():
         totalCost = monthData.totalRent + monthData.totalUtility
 
         amountsOwed = {}
-        for tenant in monthData.tenants.values():
+        unpaidTenants = list(filter(lambda x: not x.isPaid, monthData.tenants.values()))
+        for tenant in unpaidTenants:
             amountsOwed[tenant.name] = totalCost * (tenant.weeksStayed / totalWeeksStayed)
         return amountsOwed
 
