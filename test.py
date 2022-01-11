@@ -1,4 +1,5 @@
 from sheet import GoogleSheet, MonthData, MonthlyTenant
+from main import RemoveCommand
 import pytest
 
 
@@ -45,3 +46,30 @@ def testPartiallyPaidMonthCharges(partiallyPaidAugustRent):
 
     monthAmountsOwed = googleSheetConnection._getAmountsOwedForMonth(partiallyPaidAugustRent)
     assert monthAmountsOwed == expected
+
+
+def testGettingTenantFromRemovalMsg():
+    input = '/rent remove  Andrew Wittenmyer'
+    expected = 'Andrew Wittenmyer'
+
+    cmd = RemoveCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromRemovalMsgWithAt():
+    input = '/rent remove  @Andrew Wittenmyer'
+    expected = 'Andrew Wittenmyer'
+
+    cmd = RemoveCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromRemovalMsgWithoutUser():
+    input = '/rent remove '
+    expected = ''
+
+    cmd = RemoveCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected

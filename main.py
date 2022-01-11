@@ -27,7 +27,7 @@ HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>
     Mark that you've paid this month's rent
 "/rent add"
     Add someone new (you, by default) to pay the rent
-"/rent remove"
+"/rent remove <person>"
     Removes someone (you, by default) from paying rent
 "/rent rent-amt <rent cost>"
     Set the total apartment rent for the month
@@ -90,9 +90,10 @@ def getDefaultTimeForCommand() -> datetime:
 
 
 class BotCommand():
-    def __init__(self):
+    def __init__(self, cmdName: str=''):
         self.botTrigger = r'^\s*/rent\s+'
-        self.cmdRegex = re.compile(self.botTrigger)
+        self.cmdRegex = re.compile(f'{self.botTrigger}{cmdName}')
+        self.cmdName = cmdName
 
     def isCommand(self, userInput: str):
         return re.search(self.cmdRegex, userInput)
@@ -103,9 +104,7 @@ class BotCommand():
 
 class HelpCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'help'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='help')
 
     def execute(self, userInput: str, userName: str=''):
         sendBotMessage(BOT_ID, HELP_MESSAGE)
@@ -113,9 +112,7 @@ class HelpCommand(BotCommand):
 
 class AddCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'add'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='add')
 
     def execute(self, userInput: str, userName: str=''):
         googleSheetConnection.addTenant(userName, getDefaultTimeForCommand())
@@ -124,20 +121,29 @@ class AddCommand(BotCommand):
 
 class RemoveCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'remove'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='remove')
+        self.userNameRegex = re.compile(f'{self.cmdRegex.pattern}\s+@?(.+)')
+
+    def getCommandedUser(self, userInput: str) -> str:
+        matches = self.userNameRegex.search(userInput)
+        if not matches:
+            return ""
+
+        user = matches.group(1)
+        return user
 
     def execute(self, userInput: str, userName: str=''):
-        googleSheetConnection.removeTenant(userName, getDefaultTimeForCommand())
-        sendBotMessage(BOT_ID, f'Removed @{userName} from the rent roll')
+        userToRemove = self.getCommandedUser(userInput)
+        if not userToRemove:
+            userToRemove = userName
+        googleSheetConnection.removeTenant(userToRemove, getDefaultTimeForCommand())
+        sendBotMessage(BOT_ID, f'Removed @{userToRemove} from the rent roll')
 
 
 class PaidCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'paid'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='paid')
+        self.parseCostRegex = re.compile(f'{self.cmdRegex.pattern}\s+()(\d*\.?\d+)')
 
     def execute(self, userInput: str, userName: str=''):
         time = getDefaultTimeForCommand()
@@ -148,9 +154,7 @@ class PaidCommand(BotCommand):
 
 class RentAmtCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'rent-amt'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='rent-amt')
         self.parseCostRegex = re.compile(f'{self.cmdRegex.pattern}\s+\$?(\d*\.?\d+)')
 
     def execute(self, userInput: str, userName: str=''):
@@ -170,9 +174,7 @@ class RentAmtCommand(BotCommand):
 
 class UtilityAmtCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'utility-amt'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='utility-amt')
         # TODO: Try to reuse this pattern?
         self.parseCostRegex = re.compile(f'{self.cmdRegex.pattern}\s+\$?(\d*\.?\d+)')
 
@@ -193,9 +195,7 @@ class UtilityAmtCommand(BotCommand):
 
 class WeeksStayedCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'weeks-stayed'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='weeks-stayed')
         # TODO: Try to reuse this pattern?
         self.parseWeeksRegex = re.compile(f'{self.cmdRegex.pattern}\s+(\d*\.?\d+)')
 
@@ -217,9 +217,7 @@ class WeeksStayedCommand(BotCommand):
 
 class ShowCommand(BotCommand):
     def __init__(self):
-        super().__init__()
-        self.name = 'show'
-        self.cmdRegex = re.compile(f'{self.cmdRegex.pattern}{self.name}')
+        super().__init__(cmdName='show')
 
     def execute(self, userInput: str, userName: str=''):
         amountsOwed = googleSheetConnection.getAmountsOwed()
