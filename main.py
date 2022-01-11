@@ -25,9 +25,9 @@ HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>
     Mark how long you've stayed this month, e.g. "/rent weeks-stayed 4"
 "/rent paid"
     Mark that you've paid this month's rent
-"/rent add"
+"/rent add <GroupMe user name>"
     Add someone new (you, by default) to pay the rent
-"/rent remove <person>"
+"/rent remove <GroupMe user name>"
     Removes someone (you, by default) from paying rent
 "/rent rent-amt <rent cost>"
     Set the total apartment rent for the month
@@ -113,10 +113,22 @@ class HelpCommand(BotCommand):
 class AddCommand(BotCommand):
     def __init__(self):
         super().__init__(cmdName='add')
+        self.userNameRegex = re.compile(f'{self.cmdRegex.pattern}\s+@?(.+)')
+
+    def getCommandedUser(self, userInput: str) -> str:
+        matches = self.userNameRegex.search(userInput)
+        if not matches:
+            return ""
+
+        user = matches.group(1)
+        return user
 
     def execute(self, userInput: str, userName: str=''):
-        googleSheetConnection.addTenant(userName, getDefaultTimeForCommand())
-        sendBotMessage(BOT_ID, f'Added @{userName} to the rent roll')
+        userToAdd = self.getCommandedUser(userInput)
+        if not userToAdd:
+            userToAdd = userName
+        googleSheetConnection.addTenant(userToAdd, getDefaultTimeForCommand())
+        sendBotMessage(BOT_ID, f'Added @{userToAdd} to the rent roll')
 
 
 class RemoveCommand(BotCommand):

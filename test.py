@@ -1,5 +1,5 @@
 from sheet import GoogleSheet, MonthData, MonthlyTenant
-from main import RemoveCommand
+from main import AddCommand, RemoveCommand
 import pytest
 
 
@@ -71,5 +71,32 @@ def testGettingTenantFromRemovalMsgWithoutUser():
     expected = ''
 
     cmd = RemoveCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromAdditionMsg():
+    input = '/rent add  Andrew Wittenmyer'
+    expected = 'Andrew Wittenmyer'
+
+    cmd = AddCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromAdditionMsgWithAt():
+    input = '/rent add  @Andrew Wittenmyer'
+    expected = 'Andrew Wittenmyer'
+
+    cmd = AddCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromAdditionMsgWithoutUser():
+    input = '/rent add '
+    expected = ''
+
+    cmd = AddCommand()
     tenant = cmd.getCommandedUser(input)
     assert tenant == expected
