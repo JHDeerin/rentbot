@@ -18,7 +18,7 @@ from sheet import GoogleSheet
 
 TOKEN = os.environ.get('GROUPME_TOKEN')
 BOT_ID = os.environ['GROUPME_BOT_ID']
-REMINDER_MESSAGE = 'It\'s RENT TIME again for the month!\n\nPlease type "/rent weeks-stayed <num weeks>" to set how long you stayed this past month. In a few days, rents will be posted and you can type "/rent show" to see how much you owe @Mac Mathis'
+REMINDER_MESSAGE = 'It\'s RENT TIME again for the month!\n\nPlease type "/rent weeks-stayed <num weeks>" to set how long you stayed this past month (otherwise, I\'ll assume you stayed for 4 weeks). In a few days, rents will be posted and you can type "/rent show" to see how much you owe @Mac Mathis'
 HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>" (without the quotes); here're the available commands:
 
 "/rent show"
