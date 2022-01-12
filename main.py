@@ -6,6 +6,7 @@ our apartment's GroupMe about the rent
 from datetime import datetime, timedelta
 import os
 import re
+import traceback
 import typing
 
 import flask
@@ -267,7 +268,12 @@ def parseGroupMeMessage():
     for cmd in commands:
         if cmd.isCommand(msgText):
             print(f'{cmd.cmdName} triggered')
-            cmd.execute(msgText, msgUser)
+            try:
+                cmd.execute(msgText, msgUser)
+            except Exception:
+                print(traceback.format_exc())
+                sendBotMessage(BOT_ID, "🤒 Oh no - I'm feeling sick right now! Please try again when I'm feeling better (we'll send someone to patch me up)")
+                return 'Internal server error', 500
             return 'Parsed message successfully', 200
 
     sendBotMessage(BOT_ID, "Hmmm, I don't recognize that command (try typing \"/rent help\"?)")

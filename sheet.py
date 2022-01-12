@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+import enum
 import json
 import os
 import typing
@@ -28,10 +29,27 @@ class MonthData:
     tenants: typing.Dict[str, MonthlyTenant]
 
 
+class StaySchedule(enum.Enum):
+    """The type of tenants a given person could be."""
+
+    # Full-time tenants are assumed to stay for the full 4 weeks each month
+    FULLTIME = "FULLTIME"
+
+    # Irregular tenants stay at irregular intervals, and are assumed to have
+    # stayed 0 weeks each month unless otherwise noted
+    IRREGULAR = "IRREGULAR"
+
+
 @dataclass
 class CurrentTenant:
     name: str
     monthsUnpaid: typing.List[datetime]
+    staySchedule: StaySchedule
+
+    def initialWeeksStayed(self) -> float:
+        if self.staySchedule == StaySchedule.FULLTIME:
+            return 4.0
+        return 0.0
 
 
 class GoogleSheet():
@@ -43,7 +61,7 @@ class GoogleSheet():
     The sheet starts with 25 rows (equal to 1 month block's size) listing the
     current rent payers and the months they owe money for, like this:
 
-    Name,           Months Unpaid...
+    Name,           Months Unpaid               ...
     Mac Mathis,
     Jake Deerin,    8/2021, 9/2021, 10/2021
     Andrew,         10/2021
@@ -81,10 +99,9 @@ class GoogleSheet():
 
     def initializeNewSheet(self):
         createCurrentTenantsHeader = {
-            'range': 'A1:B1',
-            'values': [['Name', 'Months Unpaid']]
+            'range': 'A1:C1',
+            'values': [['Name', 'Months Unpaid', 'Stay Schedule']]
         }
-
         sheetUpdates = [createCurrentTenantsHeader]
         self._wksheet.batch_update(sheetUpdates)
 
@@ -120,6 +137,9 @@ class GoogleSheet():
         startRowIndex = startRow - 1
         return startRowIndex < len(allRows) and allRows[startRowIndex][0]
 
+    def _toBool(self, cellValue: str) -> bool:
+        return cellValue.lower() == 'true'
+
     def _getMonthBlockData(self, allRows: typing.List[list], time: datetime) -> MonthData:
         '''
         Gets the whole block of data for the given month from the sheet; can
@@ -135,9 +155,22 @@ class GoogleSheet():
         tenants = {}
         tenantRows = self._getSuccessiveDataRows(allRows, startIndex=startRowIndex + 4)
         for name, weeksStayedStr, paidStr in tenantRows:
-            tenants[name] = MonthlyTenant(name, float(weeksStayedStr), paidStr.lower() == 'true')
+            tenants[name] = MonthlyTenant(name, float(weeksStayedStr), self._toBool(paidStr))
 
         return MonthData(time.year, time.month, totalRent, totalUtility, tenants)
+
+    def _getCurrentTenant(self, row: typing.List[str]) -> CurrentTenant:
+        name = row[0]
+        monthsUnpaid = []
+        timeStrings = str(row[1]).strip().split(',')
+        for timeStr in timeStrings:
+            if timeStr:
+                monthsUnpaid.append(self._parseMonthYearString(timeStr))
+        try:
+            staySchedule = StaySchedule(row[2])
+        except ValueError:
+            staySchedule = StaySchedule.FULLTIME
+        return CurrentTenant(name, monthsUnpaid, staySchedule)
 
     def _getCurrentTenantData(self, allRows: typing.List[list]) -> typing.Dict[str, CurrentTenant]:
         '''
@@ -146,13 +179,8 @@ class GoogleSheet():
         initialTenants = {}
         tenantRows = self._getSuccessiveDataRows(allRows, startIndex=1)
         for row in tenantRows:
-            name = row[0]
-            monthsUnpaid = []
-            timeStrings = str(row[1]).strip().split(',')
-            for timeStr in timeStrings:
-                if timeStr:
-                    monthsUnpaid.append(self._parseMonthYearString(timeStr))
-            initialTenants[name] = CurrentTenant(name, monthsUnpaid)
+            tenant = self._getCurrentTenant(row)
+            initialTenants[tenant.name] = tenant
         return initialTenants
 
     def _updateCurrentTenantsData(self, newData: typing.Dict[str, CurrentTenant]) -> typing.List[dict]:
@@ -166,16 +194,20 @@ class GoogleSheet():
         }
         if len(newData) > 0:
             currentTenantsUpdate = {
-                'range': f'A2:B{len(newData)+1}',
+                'range': f'A2:C{len(newData)+1}',
                 'values': [
-                    [t.name, ','.join(list(set( [f'{x.month}/{x.year}' for x in t.monthsUnpaid] )))]
+                    [
+                        t.name,
+                        ','.join(list(set( [f'{x.month}/{x.year}' for x in t.monthsUnpaid] ))),
+                        t.staySchedule.value
+                    ]
                     for t in newData.values()
                 ]
             }
 
         clearRemainingTenantsUpdate = {
-            'range': f'A{2+len(newData)}:B{2+self.MAX_USERS}',
-            'values': [['', ''] for i in range(self.MAX_USERS - len(newData))]
+            'range': f'A{2+len(newData)}:C{2+self.MAX_USERS}',
+            'values': [['', '', ''] for i in range(self.MAX_USERS - len(newData))]
         }
         return [currentTenantsUpdate, clearRemainingTenantsUpdate]
 
@@ -225,7 +257,9 @@ class GoogleSheet():
         1) Go to the given start row for a month; if it already exists, exit
         2) Get all the users from the initial data
         3) Add the month/year and rent/utility (both as 0.0)
-        4) Add all the current users w/ 0 weeks stayed and "unpaid" status
+        4) Add all the current users w/ "unpaid" status and:
+            -   0 weeks stayed if they're irregular tenants
+            -   4 weeks stayed if they're full-time
         5) For all the current users, add the current month/year as unpaid to
         the initial data
         '''
@@ -241,7 +275,9 @@ class GoogleSheet():
 
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
 
-        monthData = MonthData(time.year, time.month, totalRent=0, totalUtility=0, tenants={name:MonthlyTenant(name, 0, False) for name in currentTenants})
+        monthData = MonthData(time.year, time.month, totalRent=0, totalUtility=0, tenants={
+            tenant.name:MonthlyTenant(tenant.name, tenant.initialWeeksStayed(), False)
+            for tenant in currentTenants.values()})
         sheetUpdates += self._updateMonthBlockData(monthData)
 
         return sheetUpdates
@@ -254,7 +290,7 @@ class GoogleSheet():
         Basic algorithm:
         1) Check if the user exists in the initial data; if they do, exit
         2) If we're already at the max capacity of users, exit
-        3) Add the user to the initial rows
+        3) Add the user to the initial rows as a FULLTIME tenant
         4) Go to the current month and add them to the next available row w/ 0
         weeks stayed
         '''
@@ -273,8 +309,9 @@ class GoogleSheet():
             currentTenants = self._getCurrentTenantData(allRows)
 
         monthData = self._getMonthBlockData(allRows, time)
-        currentTenants[tenantName] = CurrentTenant(tenantName, monthsUnpaid=[time])
-        monthData.tenants[tenantName] = (MonthlyTenant(tenantName, 0, False))
+        newTenant = CurrentTenant(tenantName, monthsUnpaid=[time], staySchedule=StaySchedule.FULLTIME)
+        currentTenants[tenantName] = newTenant
+        monthData.tenants[tenantName] = (MonthlyTenant(tenantName, newTenant.initialWeeksStayed(), False))
 
         sheetUpdates = []
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
