@@ -251,7 +251,7 @@ def parseGroupMeMessage():
     if not BotCommand().isCommand(msgText):
         return 'Not a Rentbot command', 200
 
-    print(f'Received message "{msgText}"')
+    print(f'Received message "{msgText}" from "{msgUser}"')
 
     commands = [
         HelpCommand(),
@@ -265,7 +265,7 @@ def parseGroupMeMessage():
     ]
     for cmd in commands:
         if cmd.isCommand(msgText):
-            print(f'{cmd.name} triggered')
+            print(f'{cmd.cmdName} triggered')
             cmd.execute(msgText, msgUser)
             return 'Parsed message successfully', 200
 
