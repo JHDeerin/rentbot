@@ -74,6 +74,23 @@ class GoogleSheet():
         self._sheet = self._connection.open_by_url(SHEETS_URL)
         self._wksheet = self._sheet.sheet1
 
+        if self._isEmptySheet():
+            print("Empty sheet; initializing...")
+            self.initializeNewSheet()
+            print("Sheet initialized!")
+
+    def initializeNewSheet(self):
+        createCurrentTenantsHeader = {
+            'range': 'A1:B1',
+            'values': [['Name', 'Months Unpaid']]
+        }
+
+        sheetUpdates = [createCurrentTenantsHeader]
+        self._wksheet.batch_update(sheetUpdates)
+
+    def _isEmptySheet(self) -> bool:
+        return len(self._getAllRows()) == 0
+
     def _getAllRows(self) -> typing.List[list]:
         return self._wksheet.get_all_values()
 

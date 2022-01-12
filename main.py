@@ -11,6 +11,7 @@ import typing
 import flask
 import requests
 
+import sheet
 from sheet import GoogleSheet
 
 
@@ -238,7 +239,7 @@ class ShowCommand(BotCommand):
             owedStrings = "\n".join(sorted([f'@{name}: ${amt:.2f}' for name, amt in amountsOwed.items()]))
         else:
             owedStrings = '...hmmm, I\'m not sure who\'s paying rent right now (have you run "/rent add" to add yourself?)'
-        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo $ to @Mac-Mathis-1\nSpreadsheet for audits: https://docs.google.com/spreadsheets/d/1_vVMk4uQ5vwX589MVU-wxRB-SgQORhfzybFjHk6WdlE/edit?usp=sharing'
+        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo $ to @Mac-Mathis-1\nSpreadsheet for audits: {sheet.SHEETS_URL}'
         sendBotMessage(BOT_ID, fullMessage)
 
 
