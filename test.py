@@ -1,3 +1,6 @@
+from calendar import month
+import datetime
+from time import time
 from sheet import GoogleSheet, MonthData, MonthlyTenant
 from main import AddCommand, RemoveCommand
 import pytest
@@ -100,3 +103,30 @@ def testGettingTenantFromAdditionMsgWithoutUser():
     cmd = AddCommand()
     tenant = cmd.getCommandedUser(input)
     assert tenant == expected
+
+
+def testLoadingMonthDataWithCommaRent():
+    input = [
+        ["8/2021"],
+        ["Total Rent", "1,697.20"],
+        ["Total Utility", "413.18"],
+        ["Name", "Weeks Stayed", "Paid?"],
+        ["Mac Mathis", "4", "True"]
+    ]
+    # Prepend with 1 "month" of blank data as header padding
+    for i in range(24):
+        input.insert(0, [""])
+
+    print(len(input))
+    startTimestamp = datetime.datetime(
+        googleSheetConnection.START_YEAR,
+        googleSheetConnection.START_MONTH,
+        1
+    )
+
+    monthData = googleSheetConnection._getMonthBlockData(input, startTimestamp)
+    assert monthData.totalRent == 1697.20
+    assert monthData.totalUtility == 413.18
+    assert monthData.year == 2021
+    assert monthData.month == 8
+    assert len(monthData.tenants) == 1

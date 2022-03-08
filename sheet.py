@@ -140,6 +140,9 @@ class GoogleSheet():
     def _toBool(self, cellValue: str) -> bool:
         return cellValue.lower() == 'true'
 
+    def _toFloat(self, cellValue: str) -> float:
+        return float(cellValue.replace(",", ""))
+
     def _getMonthBlockData(self, allRows: typing.List[list], time: datetime) -> MonthData:
         '''
         Gets the whole block of data for the given month from the sheet; can
@@ -149,13 +152,13 @@ class GoogleSheet():
             return None
 
         startRowIndex = self._getMonthStartRow(time) - 1
-        totalRent = float(allRows[startRowIndex + 1][1])
-        totalUtility = float(allRows[startRowIndex + 2][1])
+        totalRent = self._toFloat(allRows[startRowIndex + 1][1])
+        totalUtility = self._toFloat(allRows[startRowIndex + 2][1])
 
         tenants = {}
         tenantRows = self._getSuccessiveDataRows(allRows, startIndex=startRowIndex + 4)
         for name, weeksStayedStr, paidStr in tenantRows:
-            tenants[name] = MonthlyTenant(name, float(weeksStayedStr), self._toBool(paidStr))
+            tenants[name] = MonthlyTenant(name, self._toFloat(weeksStayedStr), self._toBool(paidStr))
 
         return MonthData(time.year, time.month, totalRent, totalUtility, tenants)
 
