@@ -286,6 +286,8 @@ def remindGroup():
     Posts a reminder to pay the rent to the GroupMe
     '''
     print('Received reminder request')
+    googleSheetConnection.createNewMonth(getDefaultTimeForCommand())
+    print(f'Made sure month data exists for {getDefaultTimeForCommand().isoformat()}')
     sendBotMessage(BOT_ID, REMINDER_MESSAGE)
     return 'Reminder message sent', 200
 

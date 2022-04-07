@@ -10,5 +10,9 @@ def send_test_message(msg: str, user: str='Jake Deerin'):
     })
 
 
+def send_test_reminder():
+    requests.get('http://localhost:5000/reminder')
+
+
 if __name__ == '__main__':
     send_test_message('/rent help')

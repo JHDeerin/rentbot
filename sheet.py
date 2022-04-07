@@ -482,3 +482,13 @@ class GoogleSheet():
                 amountsOwed[tenant] += monthAmountsOwed[tenant]
 
         return amountsOwed
+
+    def createNewMonth(self, time: datetime):
+        '''
+        Creates the data for the given month, if it doesn't already exist
+
+        Basic algorithm:
+        1) Check if the given month exists; if it doesn't, create it
+        '''
+        allRows = self._getAllRows()
+        self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
