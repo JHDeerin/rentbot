@@ -168,7 +168,7 @@ class PaidCommand(BotCommand):
             # available yet and they intended to pay for the last month
             # TODO: Find a more robust/general solution, like specifying the
             # month you want to pay for
-            time = time - datetime(year=0, month=1, day=0)
+            time = time - timedelta(days=30)
             googleSheetConnection.markRentAsPaid(userName, time)
         monthStr = time.strftime('%B')
         sendBotMessage(BOT_ID, f'@{userName} paid the rent for {monthStr} {time.year}')
