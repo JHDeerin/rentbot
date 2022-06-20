@@ -161,7 +161,15 @@ class PaidCommand(BotCommand):
 
     def execute(self, userInput: str, userName: str=''):
         time = getDefaultTimeForCommand()
-        googleSheetConnection.markRentAsPaid(userName, time)
+        try:
+            googleSheetConnection.markRentAsPaid(userName, time)
+        except sheet.MonthNotFoundError:
+            # Try going backwards 1 month; maybe the current month's data isn't
+            # available yet and they intended to pay for the last month
+            # TODO: Find a more robust/general solution, like specifying the
+            # month you want to pay for
+            time = time - datetime(year=0, month=1, day=0)
+            googleSheetConnection.markRentAsPaid(userName, time)
         monthStr = time.strftime('%B')
         sendBotMessage(BOT_ID, f'@{userName} paid the rent for {monthStr} {time.year}')
 
