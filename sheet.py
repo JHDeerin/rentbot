@@ -52,6 +52,10 @@ class CurrentTenant:
         return 0.0
 
 
+class MonthNotFoundError(Exception):
+    """Attempted to access a month that doesn't exist in the spreadsheet."""
+    pass
+
 class GoogleSheet():
     '''
     Interacts with the Google Sheet where we store audit info for the rent roll
@@ -351,7 +355,8 @@ class GoogleSheet():
 
         Basic algorithm:
         1) Check if the user exists in the initial data; if they don't, exit
-        2) Mark them as having paid for that month
+        2) Mark them as having paid for that month (if the month does not exist,
+        raise MonthNotFoundError)
         3) Remove the month as being unpaid from the initial data
         '''
         allRows = self._getAllRows()
@@ -363,6 +368,9 @@ class GoogleSheet():
             lambda t: t.year != time.year and t.month != time.month,
             currentTenants[tenantName].monthsUnpaid))
         monthData = self._getMonthBlockData(allRows, time)
+        print(monthData)
+        if monthData is None:
+            raise MonthNotFoundError
         if tenantName in monthData.tenants:
             monthData.tenants[tenantName].isPaid = True
 

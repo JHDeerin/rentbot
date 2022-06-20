@@ -1,7 +1,5 @@
-from calendar import month
 import datetime
-from time import time
-from sheet import GoogleSheet, MonthData, MonthlyTenant
+from sheet import GoogleSheet, MonthData, MonthlyTenant, MonthNotFoundError
 from main import AddCommand, RemoveCommand
 import pytest
 
@@ -130,3 +128,27 @@ def testLoadingMonthDataWithCommaRent():
     assert monthData.year == 2021
     assert monthData.month == 8
     assert len(monthData.tenants) == 1
+
+
+def testMonthDataExistsReturnsFalseForMissingMonth():
+    input = [
+        ["8/2021"],
+        ["Total Rent", "1,697.20"],
+        ["Total Utility", "413.18"],
+        ["Name", "Weeks Stayed", "Paid?"],
+        ["Mac Mathis", "4", "True"]
+    ]
+    # Prepend with 1 "month" of blank data as header padding
+    for i in range(24):
+        input.insert(0, [""])
+
+    testDate = datetime.datetime(9999, 10, 1)
+    assert not googleSheetConnection._monthDataExists(
+        googleSheetConnection._getAllRows(), testDate
+    )
+
+
+def testTryingToMarkNonExistentMonthAsPaidCausesException():
+    testDate = datetime.datetime(9999, 10, 1)
+    with pytest.raises(MonthNotFoundError):
+        googleSheetConnection.markRentAsPaid("Jake Deerin", testDate)
