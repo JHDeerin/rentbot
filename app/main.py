@@ -12,8 +12,8 @@ import typing
 import flask
 import requests
 
-import sheet
-from sheet import GoogleSheet
+from . import sheet
+from .sheet import GoogleSheet
 
 
 TOKEN = os.environ.get('GROUPME_TOKEN')

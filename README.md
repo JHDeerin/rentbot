@@ -12,3 +12,34 @@ Make sure to define the `GROUPME_BOT_ID` environment variable as...well...your G
 
 -   The URL to your spreadsheet under `RENTBOT_GSHEETS_URL`
 -   The API key to your spreadsheet under `RENTBOT_GSHEETS_KEY`
+
+## Development
+
+### Installation
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+### Running Tests
+
+```bash
+python -m pytest
+```
+
+### Running Server
+
+**via Python**
+```bash
+gunicorn app.main:app -b "0.0.0.0:5000"
+```
+
+**via Docker**
+```bash
+# TODO
+```
+
+You can then send test messages to the app by running `python test/sendTestMsg.py` in another window.

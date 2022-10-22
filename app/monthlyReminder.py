@@ -5,7 +5,7 @@ to the GroupMe bot
 '''
 from datetime import datetime
 
-import main
+from . import main
 
 
 def is1stDayOfMonth() -> bool:
