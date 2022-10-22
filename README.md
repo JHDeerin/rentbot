@@ -43,3 +43,11 @@ gunicorn app.main:app -b "0.0.0.0:5000"
 ```
 
 You can then send test messages to the app by running `python test/sendTestMsg.py` in another window.
+
+### Applying Linters
+
+```bash
+autopep8 --in-place -r .
+isort .
+flake8 --exclude ".venv"
+```

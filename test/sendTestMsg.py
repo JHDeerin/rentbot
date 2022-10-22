@@ -3,7 +3,7 @@
 import requests
 
 
-def send_test_message(msg: str, user: str='Jake Deerin'):
+def send_test_message(msg: str, user: str = 'Jake Deerin'):
     requests.post('http://localhost:5000/', json={
         'text': msg,
         'name': user

@@ -1,12 +1,11 @@
-from dataclasses import dataclass
-from datetime import datetime
 import enum
 import json
 import os
 import typing
+from dataclasses import dataclass
+from datetime import datetime
 
 import gspread
-
 
 SHEETS_KEY_PATH = os.environ.get('RENTBOT_GSHEETS_KEY_PATH')
 SHEETS_KEY = os.environ.get('RENTBOT_GSHEETS_KEY')
@@ -56,6 +55,7 @@ class MonthNotFoundError(Exception):
     """Attempted to access a month that doesn't exist in the spreadsheet."""
     pass
 
+
 class GoogleSheet():
     '''
     Interacts with the Google Sheet where we store audit info for the rent roll
@@ -82,14 +82,16 @@ class GoogleSheet():
     Mac Mathis,     1.5,            True
     ...
     '''
+
     def __init__(self):
         self.START_YEAR = 2021
         self.START_MONTH = 8
         self.MAX_USERS = 20
-        self.MONTH_BLOCK_SIZE = 25 # allocate 25 rows to each month
+        self.MONTH_BLOCK_SIZE = 25  # allocate 25 rows to each month
 
         if SHEETS_KEY_PATH:
-            self._connection = gspread.service_account(filename=SHEETS_KEY_PATH)
+            self._connection = gspread.service_account(
+                filename=SHEETS_KEY_PATH)
         else:
             key = json.loads(SHEETS_KEY)
             self._connection = gspread.service_account_from_dict(key)
@@ -116,7 +118,8 @@ class GoogleSheet():
         return self._wksheet.get_all_values()
 
     def _getMonthStartRow(self, time: datetime) -> int:
-        monthsFromStart = 12 * (time.year - self.START_YEAR) + (time.month - self.START_MONTH)
+        monthsFromStart = 12 * (time.year - self.START_YEAR) + \
+            (time.month - self.START_MONTH)
         # Need the +1 to allow padding for the initial block of users
         return self.MONTH_BLOCK_SIZE * (monthsFromStart + 1)
 
@@ -160,9 +163,11 @@ class GoogleSheet():
         totalUtility = self._toFloat(allRows[startRowIndex + 2][1])
 
         tenants = {}
-        tenantRows = self._getSuccessiveDataRows(allRows, startIndex=startRowIndex + 4)
+        tenantRows = self._getSuccessiveDataRows(
+            allRows, startIndex=startRowIndex + 4)
         for name, weeksStayedStr, paidStr in tenantRows:
-            tenants[name] = MonthlyTenant(name, self._toFloat(weeksStayedStr), self._toBool(paidStr))
+            tenants[name] = MonthlyTenant(name, self._toFloat(
+                weeksStayedStr), self._toBool(paidStr))
 
         return MonthData(time.year, time.month, totalRent, totalUtility, tenants)
 
@@ -205,7 +210,8 @@ class GoogleSheet():
                 'values': [
                     [
                         t.name,
-                        ','.join(list(set( [f'{x.month}/{x.year}' for x in t.monthsUnpaid] ))),
+                        ','.join(
+                            list(set([f'{x.month}/{x.year}' for x in t.monthsUnpaid]))),
                         t.staySchedule.value
                     ]
                     for t in newData.values()
@@ -242,7 +248,8 @@ class GoogleSheet():
             'values': [['Name', 'Weeks Stayed', 'Paid?']]
         }
 
-        monthlyTenantsUpdate = {'range': f'A{startRow+4}:A{startRow+4}', 'values': [['']]}
+        monthlyTenantsUpdate = {
+            'range': f'A{startRow+4}:A{startRow+4}', 'values': [['']]}
         if len(newData.tenants) > 0:
             monthlyTenantsUpdate = {
                 'range': f'A{startRow+4}:C{startRow+3+len(newData.tenants)}',
@@ -283,7 +290,8 @@ class GoogleSheet():
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
 
         monthData = MonthData(time.year, time.month, totalRent=0, totalUtility=0, tenants={
-            tenant.name:MonthlyTenant(tenant.name, tenant.initialWeeksStayed(), False)
+            tenant.name: MonthlyTenant(
+                tenant.name, tenant.initialWeeksStayed(), False)
             for tenant in currentTenants.values()})
         sheetUpdates += self._updateMonthBlockData(monthData)
 
@@ -311,14 +319,17 @@ class GoogleSheet():
             return
 
         if not self._monthDataExists(allRows, time):
-            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            self._wksheet.batch_update(
+                self._createMonthBlockData(allRows, time))
             allRows = self._getAllRows()
             currentTenants = self._getCurrentTenantData(allRows)
 
         monthData = self._getMonthBlockData(allRows, time)
-        newTenant = CurrentTenant(tenantName, monthsUnpaid=[time], staySchedule=StaySchedule.FULLTIME)
+        newTenant = CurrentTenant(tenantName, monthsUnpaid=[
+                                  time], staySchedule=StaySchedule.FULLTIME)
         currentTenants[tenantName] = newTenant
-        monthData.tenants[tenantName] = (MonthlyTenant(tenantName, newTenant.initialWeeksStayed(), False))
+        monthData.tenants[tenantName] = (MonthlyTenant(
+            tenantName, newTenant.initialWeeksStayed(), False))
 
         sheetUpdates = []
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
@@ -390,7 +401,8 @@ class GoogleSheet():
         allRows = self._getAllRows()
         monthData = self._getMonthBlockData(allRows, time)
         if not monthData:
-            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            self._wksheet.batch_update(
+                self._createMonthBlockData(allRows, time))
             allRows = self._getAllRows()
             monthData = self._getMonthBlockData(allRows, time)
 
@@ -411,7 +423,8 @@ class GoogleSheet():
         allRows = self._getAllRows()
         monthData = self._getMonthBlockData(allRows, time)
         if not monthData:
-            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            self._wksheet.batch_update(
+                self._createMonthBlockData(allRows, time))
             allRows = self._getAllRows()
             monthData = self._getMonthBlockData(allRows, time)
 
@@ -437,7 +450,8 @@ class GoogleSheet():
 
         monthData = self._getMonthBlockData(allRows, time)
         if not monthData:
-            self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+            self._wksheet.batch_update(
+                self._createMonthBlockData(allRows, time))
             allRows = self._getAllRows()
             monthData = self._getMonthBlockData(allRows, time)
 
@@ -448,16 +462,19 @@ class GoogleSheet():
         self._wksheet.batch_update(sheetUpdates)
 
     def _getAmountsOwedForMonth(self, monthData: MonthData) -> typing.Dict[str, float]:
-        totalWeeksStayed = sum(map(lambda x: x.weeksStayed, monthData.tenants.values()))
+        totalWeeksStayed = sum(
+            map(lambda x: x.weeksStayed, monthData.tenants.values()))
         # Prevent division by 0 error (totals will still be 0)
         if totalWeeksStayed == 0:
             totalWeeksStayed += 1
         totalCost = monthData.totalRent + monthData.totalUtility
 
         amountsOwed = {}
-        unpaidTenants = list(filter(lambda x: not x.isPaid, monthData.tenants.values()))
+        unpaidTenants = list(
+            filter(lambda x: not x.isPaid, monthData.tenants.values()))
         for tenant in unpaidTenants:
-            amountsOwed[tenant.name] = totalCost * (tenant.weeksStayed / totalWeeksStayed)
+            amountsOwed[tenant.name] = totalCost * \
+                (tenant.weeksStayed / totalWeeksStayed)
         return amountsOwed
 
     def getAmountsOwed(self) -> typing.Dict[str, float]:
