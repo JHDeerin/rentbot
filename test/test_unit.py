@@ -2,8 +2,9 @@ import datetime
 
 import pytest
 
-from app.main import AddCommand, RemoveCommand
-from app.sheet import GoogleSheet, MonthData, MonthlyTenant, MonthNotFoundError
+from app.app.main import AddCommand, RemoveCommand
+from app.app.sheet import (GoogleSheet, MonthData, MonthlyTenant,
+                           MonthNotFoundError)
 
 googleSheetConnection = GoogleSheet()
 

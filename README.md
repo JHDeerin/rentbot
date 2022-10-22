@@ -17,6 +17,8 @@ Make sure to define the `GROUPME_BOT_ID` environment variable as...well...your G
 
 ### Installation
 
+In the repo's root directory, run the following terminal commands:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -32,14 +34,16 @@ python -m pytest
 
 ### Running Server
 
+First, create a `.env` file in the repo root from the `example.env` template. Then run one of the following:
+
 **via Python**
 ```bash
-gunicorn app.main:app -b "0.0.0.0:5000"
+gunicorn app.app.main:app -b "0.0.0.0:5000"
 ```
 
 **via Docker**
 ```bash
-# TODO
+docker compose up
 ```
 
 You can then send test messages to the app by running `python test/sendTestMsg.py` in another window.
