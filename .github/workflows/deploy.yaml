@@ -14,6 +14,9 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+     contents: read
+     id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,7 +28,7 @@ jobs:
           service_account: rentbot-deployment@groupme-rentbot.iam.gserviceaccount.com
 
       - name: Authenticate Docker with GCP
-        run: gcloud auth configure-docker --quiet
+        run: gcloud auth configure-docker us-east1-docker.pkg.dev --quiet
 
       - name: Build Rentbot Docker image
         id: docker-build
