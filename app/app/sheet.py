@@ -89,12 +89,12 @@ class GoogleSheet():
         self.MAX_USERS = 20
         self.MONTH_BLOCK_SIZE = 25  # allocate 25 rows to each month
 
-        if SHEETS_KEY_PATH:
-            self._connection = gspread.service_account(
-                filename=SHEETS_KEY_PATH)
-        else:
+        if SHEETS_KEY:
             key = json.loads(SHEETS_KEY)
             self._connection = gspread.service_account_from_dict(key)
+        else:
+            self._connection = gspread.service_account(
+                filename=SHEETS_KEY_PATH)
         self._sheet = self._connection.open_by_url(SHEETS_URL)
         self._wksheet = self._sheet.sheet1
 

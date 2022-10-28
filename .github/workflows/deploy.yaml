@@ -1,0 +1,38 @@
+name: Deploy Rentbot to Cloud Run
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  GCP_REGION: us-east1
+  GCP_PROJECT: groupme-rentbot
+  GCP_ARTIFACT_REPOSITORY: images
+  GCP_DOCKER_IMAGE: rentbot
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: projects/240990485203/locations/global/workloadIdentityPools/rentbot-github-actions/providers/github
+          service_account: rentbot-deployment@groupme-rentbot.iam.gserviceaccount.com
+
+      - name: Authenticate Docker with GCP
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build Rentbot Docker image
+        id: docker-build
+        run: |
+          IMAGE_FULL_NAME=${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${GCP_ARTIFACT_REPOSITORY}/${GCP_DOCKER_IMAGE}
+          docker build . -t ${IMAGE_FULL_NAME}:latest
+          echo "image=$IMAGE_FULL_NAME" >> $GITHUB_OUTPUT
+
+      - name: Push Docker image to GCP
+        run: docker push ${{ steps.docker-build.outputs.image }}
