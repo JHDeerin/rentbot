@@ -39,3 +39,18 @@ jobs:
 
       - name: Push Docker image to GCP
         run: docker push ${{ steps.docker-build.outputs.image }}
+
+      - name: Deploy Docker image to GCP Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v0
+        with:
+          service: ${{ env.GCP_DOCKER_IMAGE }}
+          image: ${{ steps.docker-build.outputs.image }}:latest
+          region: ${{ env.GCP_REGION }}
+          secrets: |
+            GROUPME_BOT_ID=RENTBOT_GROUPME_ID_DEV
+            RENTBOT_GSHEETS_KEY=RENTBOT_GSHEETS_KEY_PROD
+            RENTBOT_GSHEETS_URL=RENTBOT_GSHEETS_URL_DEV
+          flags: |
+            --service-account=rentbot-576mcafee@groupme-rentbot.iam.gserviceaccount.com
+            --max-instances=1
+            --port=80
