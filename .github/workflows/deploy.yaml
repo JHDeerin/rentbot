@@ -47,9 +47,9 @@ jobs:
           image: ${{ steps.docker-build.outputs.image }}:latest
           region: ${{ env.GCP_REGION }}
           secrets: |
-            GROUPME_BOT_ID=RENTBOT_GROUPME_ID_DEV:latest
+            GROUPME_BOT_ID=RENTBOT_GROUPME_ID_PROD:latest
             RENTBOT_GSHEETS_KEY=RENTBOT_GSHEETS_KEY_PROD:latest
-            RENTBOT_GSHEETS_URL=RENTBOT_GSHEETS_URL_DEV:latest
+            RENTBOT_GSHEETS_URL=RENTBOT_GSHEETS_URL_PROD:latest
           flags: |
             --service-account=rentbot-576mcafee-apt204@groupme-rentbot.iam.gserviceaccount.com
             --max-instances=1
