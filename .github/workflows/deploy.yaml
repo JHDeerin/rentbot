@@ -21,6 +21,13 @@ jobs:
      contents: read
      id-token: write
     steps:
+      - name: Bump version (if needed)
+        if: github.event_name == 'push'
+        uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: python
+          command: github-release
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
