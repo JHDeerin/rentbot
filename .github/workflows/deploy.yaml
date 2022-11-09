@@ -20,6 +20,9 @@ jobs:
      contents: read
      id-token: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Bump version (if needed)
         if: github.event_name == 'push'
         uses: TriPSs/conventional-changelog-action@v3
@@ -33,9 +36,6 @@ jobs:
         with:
           release-type: python
           command: github-release
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v0
