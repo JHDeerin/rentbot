@@ -318,13 +318,10 @@ class GoogleSheet():
             # TODO: Throw some kind of exception instead
             return
 
-        if not self._monthDataExists(allRows, time):
-            self._wksheet.batch_update(
-                self._createMonthBlockData(allRows, time))
-            allRows = self._getAllRows()
-            currentTenants = self._getCurrentTenantData(allRows)
-
         monthData = self._getMonthBlockData(allRows, time)
+        if not monthData:
+            allRows, monthData = self.createNewMonth(time)
+
         newTenant = CurrentTenant(tenantName, monthsUnpaid=[
                                   time], staySchedule=StaySchedule.FULLTIME)
         currentTenants[tenantName] = newTenant
@@ -401,10 +398,7 @@ class GoogleSheet():
         allRows = self._getAllRows()
         monthData = self._getMonthBlockData(allRows, time)
         if not monthData:
-            self._wksheet.batch_update(
-                self._createMonthBlockData(allRows, time))
-            allRows = self._getAllRows()
-            monthData = self._getMonthBlockData(allRows, time)
+            allRows, monthData = self.createNewMonth(time)
 
         monthData.totalRent = totalRent
 
@@ -423,10 +417,7 @@ class GoogleSheet():
         allRows = self._getAllRows()
         monthData = self._getMonthBlockData(allRows, time)
         if not monthData:
-            self._wksheet.batch_update(
-                self._createMonthBlockData(allRows, time))
-            allRows = self._getAllRows()
-            monthData = self._getMonthBlockData(allRows, time)
+            allRows, monthData = self.createNewMonth(time)
 
         monthData.totalUtility = totalUtility
 
@@ -450,10 +441,7 @@ class GoogleSheet():
 
         monthData = self._getMonthBlockData(allRows, time)
         if not monthData:
-            self._wksheet.batch_update(
-                self._createMonthBlockData(allRows, time))
-            allRows = self._getAllRows()
-            monthData = self._getMonthBlockData(allRows, time)
+            allRows, monthData = self.createNewMonth(time)
 
         monthData.tenants[tenantName].weeksStayed = weeks
 
@@ -508,12 +496,15 @@ class GoogleSheet():
 
         return amountsOwed
 
-    def createNewMonth(self, time: datetime):
+    def createNewMonth(self, time: datetime) -> typing.Tuple[list, MonthData]:
         '''
         Creates the data for the given month, if it doesn't already exist
 
         Basic algorithm:
         1) Check if the given month exists; if it doesn't, create it
+        2) Return the rows and MonthData
         '''
         allRows = self._getAllRows()
         self._wksheet.batch_update(self._createMonthBlockData(allRows, time))
+        allRows = self._getAllRows()
+        return allRows, self._getMonthBlockData(allRows, time)
