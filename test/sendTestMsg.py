@@ -15,4 +15,4 @@ def send_test_reminder():
 
 
 if __name__ == '__main__':
-    send_test_message('/rent help')
+    send_test_message('/rent show')

@@ -2,9 +2,8 @@ import datetime
 
 import pytest
 
-from app.app.main import AddCommand, RemoveCommand
-from app.app.sheet import (GoogleSheet, MonthData, MonthlyTenant,
-                           MonthNotFoundError)
+from app.main import AddCommand, RemoveCommand
+from app.sheet import GoogleSheet, MonthData, MonthlyTenant, MonthNotFoundError
 
 googleSheetConnection = GoogleSheet()
 
@@ -158,3 +157,14 @@ def testTryingToMarkNonExistentMonthAsPaidCausesException():
     testDate = datetime.datetime(9999, 10, 1)
     with pytest.raises(MonthNotFoundError):
         googleSheetConnection.markRentAsPaid("Jake Deerin", testDate)
+
+
+def testTenantRowsWithExtraDataOkay():
+    testTenantRows = [
+        ['Mac Mathis', '4', 'True', ''], ['Jake Deerin', '4', 'True', 'blah']
+    ]
+    tenants = googleSheetConnection._getTenantsFromMonthRows(testTenantRows)
+    assert tenants["Mac Mathis"] == MonthlyTenant(
+        name='Mac Mathis', weeksStayed=4.0, isPaid=True)
+    assert tenants["Jake Deerin"] == MonthlyTenant(
+        name='Jake Deerin', weeksStayed=4.0, isPaid=True)

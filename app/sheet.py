@@ -144,11 +144,22 @@ class GoogleSheet():
         startRowIndex = startRow - 1
         return startRowIndex < len(allRows) and allRows[startRowIndex][0]
 
-    def _toBool(self, cellValue: str) -> bool:
+    @classmethod
+    def _toBool(cls, cellValue: str) -> bool:
         return cellValue.lower() == 'true'
 
-    def _toFloat(self, cellValue: str) -> float:
+    @classmethod
+    def _toFloat(cls, cellValue: str) -> float:
         return float(cellValue.replace(",", ""))
+
+    @classmethod
+    def _getTenantsFromMonthRows(cls, tenantRows: typing.List[typing.List[str]]) -> typing.Dict[str, MonthlyTenant]:
+        """Get the tenants from a given month's data rows."""
+        tenants = {}
+        for name, weeksStayedStr, paidStr, *_unused in tenantRows:
+            tenants[name] = MonthlyTenant(name, cls._toFloat(
+                weeksStayedStr), cls._toBool(paidStr))
+        return tenants
 
     def _getMonthBlockData(self, allRows: typing.List[list], time: datetime) -> MonthData:
         '''
@@ -165,9 +176,7 @@ class GoogleSheet():
         tenants = {}
         tenantRows = self._getSuccessiveDataRows(
             allRows, startIndex=startRowIndex + 4)
-        for name, weeksStayedStr, paidStr in tenantRows:
-            tenants[name] = MonthlyTenant(name, self._toFloat(
-                weeksStayedStr), self._toBool(paidStr))
+        tenants = self._getTenantsFromMonthRows(tenantRows)
 
         return MonthData(time.year, time.month, totalRent, totalUtility, tenants)
 
