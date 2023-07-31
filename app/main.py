@@ -17,7 +17,9 @@ from .sheet import GoogleSheet
 
 TOKEN = os.environ.get('GROUPME_TOKEN')
 BOT_ID = os.environ['GROUPME_BOT_ID']
-REMINDER_MESSAGE = 'It\'s RENT TIME again for the month!\n\nPlease type "/rent weeks-stayed <num weeks>" to set how long you stayed this past month (otherwise, I\'ll assume you stayed for 4 weeks). In a few days, rents will be posted and you can type "/rent show" to see how much you owe @Mac Mathis'
+LANDLORD_GROUPME_NAME = "Jake Deerin"
+LANDLORD_VENMO = "Jake-Deerin"
+REMINDER_MESSAGE = f'It\'s RENT TIME again for the month!\n\nPlease type "/rent weeks-stayed <num weeks>" to set how long you stayed this past month (otherwise, I\'ll assume you stayed for 4 weeks). In a few days, rents will be posted and you can type "/rent show" to see how much you owe @{LANDLORD_GROUPME_NAME}'
 HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>" (without the quotes); here're the available commands:
 
 "/rent show"
@@ -37,7 +39,7 @@ HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>
 "/rent help"
     Have this chit-chat with me again, anytime
 
-If you need more info, you can poke around my insides here: https://github.com/JHDeerin/groupmeRentReminder
+If you need more info, you can poke around my insides here: https://github.com/JHDeerin/rentbot
 '''
 
 
@@ -260,7 +262,7 @@ class ShowCommand(BotCommand):
                 sorted([f'@{name}: ${amt:.2f}' for name, amt in amountsOwed.items()]))
         else:
             owedStrings = '...hmmm, I\'m not sure who\'s paying rent right now (have you run "/rent add" to add yourself?)'
-        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo $ to @Mac-Mathis-1\nSpreadsheet for audits: {sheet.SHEETS_URL}'
+        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo $ to @{LANDLORD_VENMO}\nSpreadsheet for audits: {sheet.SHEETS_URL}'
         sendBotMessage(BOT_ID, fullMessage)
 
 
