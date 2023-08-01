@@ -358,12 +358,13 @@ class GoogleSheet():
 
         del currentTenants[tenantName]
         monthData = self._getMonthBlockData(allRows, time)
-        if tenantName in monthData.tenants:
+        if monthData and tenantName in monthData.tenants:
             del monthData.tenants[tenantName]
 
         sheetUpdates = []
         sheetUpdates += self._updateCurrentTenantsData(currentTenants)
-        sheetUpdates += self._updateMonthBlockData(monthData)
+        if monthData:
+            sheetUpdates += self._updateMonthBlockData(monthData)
         self._wksheet.batch_update(sheetUpdates)
 
     def markRentAsPaid(self, tenantName: str, time: datetime):

@@ -159,6 +159,14 @@ def testTryingToMarkNonExistentMonthAsPaidCausesException():
         googleSheetConnection.markRentAsPaid("Jake Deerin", testDate)
 
 
+def testTryingToRemoveTenantFromNonExistentMonthOkay():
+    googleSheetConnection.addTenant(
+        "Jake Deerin", datetime.datetime(2022, 9, 15))
+
+    testDate = datetime.datetime(9999, 10, 1)
+    googleSheetConnection.removeTenant("Jake Deerin", testDate)
+
+
 def testTenantRowsWithExtraDataOkay():
     testTenantRows = [
         ['Mac Mathis', '4', 'True', ''], ['Jake Deerin', '4', 'True', 'blah']
