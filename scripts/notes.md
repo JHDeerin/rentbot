@@ -2,7 +2,7 @@
 
 ## Automating Rent Amount entry
 
-Right now, Mr. Rentbot does a fine job of keeping track of our basic rental needs, but there're still some manual steps that it doesn't take care of for us yet. In particular, there are 2 big ones that prevent us from setting up all our rental info once and then never having to touch it again[*](until-someone-moves-out-slash-in-slash-dies-slash-etc):
+Right now, Mr. Rentbot does a fine job of keeping track of our basic rental needs, but there're still some manual steps that it doesn't take care of for us yet. In particular, there are 2 big ones that prevent us from setting up all our rental info once and then never having to touch it again[*](until_someone_moves_out/in/dies/etc):
 
 1.  Entering the rent/utility/etc. amounts we owe our various service providers for the month, and
 2.  Actually requesting/sending payments from everyone's bank accounts.
@@ -44,4 +44,41 @@ Alright, we've got the process, now we need to figure out how to automate this.
 
 First, let's focus on trying to get the rent info. At a minimum the info we need for this is a list of each website, the required login for that website (let's assume just a username and password for now, although who knows how 2-factor auth/etc. could throw this for a loop), and what part of the website to actually scrape the data from to get the rent + utility info.
 
-I think a good, initial goal is to create a script I can run that'll print out the rent and utility amounts I owe. I'll definitely need to break that into smaller tasks, but let's start with that.
+I think a good, initial goal is to create a script I can run that'll print out the rent and utility amounts I owe. I'll definitely need to break that into smaller tasks, but let's start with creating a basic outline call:
+
+```python
+@dataclass
+class RentBill:
+    """Payment information due for the current month's rent"""
+
+    rent_amt: float
+    utility_amt: float
+
+    @property
+    def total_amt(self):
+        return self.rent_amt + self.utility_amt
+
+bill = get_rental_bill_amt(
+    time=datetime.fromisoformat("2023-10-09"),
+    bill_sources=[#... will figure this out later]
+)
+```
+
+The first immediate challenge is figuring out how to actually log in to each website[*](the_only_other_alternative_information_source_to_get_this_data_would_be_my_email_which_is_a_possibility_but_annoyingly_Centennial_doesnt_email_me_when_a_bill_is_due) - how do we do that? Let's check some scraping resources for research:
+
+-   https://scrapeops.io/python-scrapy-playbook/scrapy-login-form/
+-   https://www.zenrows.com/blog/web-scraping-login-python
+
+What login methods do we need for each particular bill site?
+
+-   The Centennial Apartments site seems fairly simple: a `POST` request to `https://centennialplaceapartments.securecafe.com/residentservices/ResidentCafeHandler.ashx` with a `application/x-www-form-urlencoded` payload that looks as follows:
+    ```
+    myFormName: bG9naW4%3d-vBWpf6b9fhg%3d
+    Username: ***
+    Password: ***
+    PortalNameInput: centennial-place
+    formName: WVNJLkNhZmUuQWZmLlJlc2lkZW50LkNvbnRlbnRDbGFzc2VzLlVzZXJMb2dpbiwgWVNJLkNhZmUuQWZmLlJlc2lkZW50LCBWZXJzaW9uPTE3LjIuMzEzNC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPW51bGwjU2F2ZUNvbnRlbnQ%3d-VwPTLV9pq6M%3d
+    cafeportalkey: NDE5MDk4IzMxNjY%3d-mCrbSEOBY0E%3d
+    ```
+    -   Fortunately, the form name and `cafeportalkey` seem to remain constant in-between requests (although this could be fragile and broken by website updates - but then again, so could this whole thing, couldn't it?)
+    -   Then, getting the recent activity HTML page is just a `GET` request to `https://centennialplaceapartments.securecafe.com/residentservices/ResidentCafeLoadContent.ashx?content=TXlBY2NvdW50UmVjZW50Vmlldw%3d%3d-QaIlvtNcu8A%3d&cafeportalkey=NDE5MDk4IzMxNjY%253d-mCrbSEOBY0E%253d` - this also doesn't seem to change, fortunately (but again, fragile)

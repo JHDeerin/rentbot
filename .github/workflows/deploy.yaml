@@ -5,6 +5,7 @@ on:
       - main
     paths-ignore:
       - README.md
+      - scripts/**
   workflow_dispatch:
 
 env:
