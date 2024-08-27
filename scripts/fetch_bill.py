@@ -34,4 +34,5 @@ if __name__ == "__main__":
             # BillWebsite(login_url="https://centennialplaceapartments.securecafe.com/residentservices/centennial-place/userlogin.aspx#tab_PaymentAccounts", bill_url="https://centennialplaceapartments.securecafe.com/residentservices/centennial-place/payments.aspx#tab_RecentActivity")
         ]
     )
-    print(f"Total owed: ${bill.total_amt:.2f} (${bill.rent_amt:.2f} rent + ${bill.utility_amt:.2f})")
+    print(
+        f"Total owed: ${bill.total_amt:.2f} (${bill.rent_amt:.2f} rent + ${bill.utility_amt:.2f})")

@@ -34,6 +34,9 @@ class StaySchedule(enum.Enum):
     # Full-time tenants are assumed to stay for the full 4 weeks each month
     FULLTIME = "FULLTIME"
 
+    # Half-time tenants are assumed to stay for 2 weeks each month
+    HALFTIME = "HALFTIME"
+
     # Irregular tenants stay at irregular intervals, and are assumed to have
     # stayed 0 weeks each month unless otherwise noted
     IRREGULAR = "IRREGULAR"
@@ -48,6 +51,8 @@ class CurrentTenant:
     def initialWeeksStayed(self) -> float:
         if self.staySchedule == StaySchedule.FULLTIME:
             return 4.0
+        elif self.staySchedule == StaySchedule.HALFTIME:
+            return 2.0
         return 0.0
 
 

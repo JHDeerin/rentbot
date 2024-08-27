@@ -82,3 +82,5 @@ What login methods do we need for each particular bill site?
     ```
     -   Fortunately, the form name and `cafeportalkey` seem to remain constant in-between requests (although this could be fragile and broken by website updates - but then again, so could this whole thing, couldn't it?)
     -   Then, getting the recent activity HTML page is just a `GET` request to `https://centennialplaceapartments.securecafe.com/residentservices/ResidentCafeLoadContent.ashx?content=TXlBY2NvdW50UmVjZW50Vmlldw%3d%3d-QaIlvtNcu8A%3d&cafeportalkey=NDE5MDk4IzMxNjY%253d-mCrbSEOBY0E%253d` - this also doesn't seem to change, fortunately (but again, fragile)
+
+-   Hmmm, trying to send that in cURL/Postman, I'm getting a 403 error and I can't figure out why (could it be an origin/CORS thing?). Unsure.
