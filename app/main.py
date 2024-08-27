@@ -18,14 +18,15 @@ from .sheet import GoogleSheet
 TOKEN = os.environ.get('GROUPME_TOKEN')
 BOT_ID = os.environ['GROUPME_BOT_ID']
 LANDLORD_GROUPME_NAME = "Jake Deerin"
-LANDLORD_VENMO = "Jake-Deerin"
-REMINDER_MESSAGE = f'It\'s RENT TIME again for the month!\n\nPlease type "/rent weeks-stayed <num weeks>" to set how long you stayed this past month (otherwise, I\'ll assume you stayed for 4 weeks). In a few days, rents will be posted and you can type "/rent show" to see how much you owe @{LANDLORD_GROUPME_NAME}'
+LANDLORD_VENMO = "https://venmo.com/Jake-Deerin"
+LANDLORD_PAYPAL = "https://paypal.me/jhdeerin"
+REMINDER_MESSAGE = f'It\'s RENT TIME again for the month!\n\nIn a few days, rents will be posted and you can type "/rent show" to see how much you owe @{LANDLORD_GROUPME_NAME}'
 HELP_MESSAGE = '''Hey! You can make me do things by typing "/rent <command name>" (without the quotes); here're the available commands:
 
 "/rent show"
     Show how much everyone owes right now + how to pay
 "/rent weeks-stayed <num weeks>"
-    Mark how long you've stayed this month, e.g. "/rent weeks-stayed 4"
+    (Deprecated) Mark how long you've stayed this month, e.g. "/rent weeks-stayed 4"
 "/rent paid"
     Mark that you've paid this month's rent
 "/rent add <GroupMe user name>"
@@ -262,7 +263,7 @@ class ShowCommand(BotCommand):
                 sorted([f'@{name}: ${amt:.2f}' for name, amt in amountsOwed.items()]))
         else:
             owedStrings = '...hmmm, I\'m not sure who\'s paying rent right now (have you run "/rent add" to add yourself?)'
-        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo $ to @{LANDLORD_VENMO}\nSpreadsheet for audits: {sheet.SHEETS_URL}'
+        fullMessage = f'=== Rents Due ===\n{owedStrings}\n\nVenmo: {LANDLORD_VENMO}\nPayPal: {LANDLORD_PAYPAL}\nSpreadsheet for audits: {sheet.SHEETS_URL}'
         sendBotMessage(BOT_ID, fullMessage)
 
 
