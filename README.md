@@ -2,15 +2,15 @@
 
 ![](https://pbs.twimg.com/media/EPYZgsIWsAEZNMs.jpg)
 
-A GroupMe bot that helps calculate the rent (so that Mac can eat, too).
+A GroupMe bot that helps calculate the rent (so that ~~Mac~~ I can eat, too).
 
 The bot can receive commands from a text chat (currently GroupMe), and based on that track + display the rents owed by up to 25 people in our apartment (currently via Google Sheets, for human-editable convenience).
 
 ## Deployment
 
-Stanrdard GitHub Actions fare: make a push to the `main` branch, and let it [deploy] to Google Cloud Run. We also trigger a monthly rent reminder a [GitHub Action scheduler](https://devcenter.heroku.com/articles/scheduler) so we can have monthly rent reminders.
+Standard GitHub Actions fare: make a push to the `main` branch, and let it deploy to Google Cloud Run. We also trigger a monthly rent reminder a [GitHub Action scheduler](https://devcenter.heroku.com/articles/scheduler) so we can have monthly rent reminders.
 
-The bot needs to be hosted on a server and hooked up to Google Sheet it can write rents to. Make sure to define the `GROUPME_BOT_ID` environment variable as...well...your [GroupMe bot's](https://dev.groupme.com/tutorials/bots) ID, or the script will totter about like a fop and crash. For the full spreadsheet rent-tracking extravaganza, you'll need to set up [gspread](https://docs.gspread.org/en/latest/oauth2.html#service-account) and include the following environment variables:
+The bot needs to be hosted on a server and hooked up to a Google Sheet it can write rents to. Make sure to define the `GROUPME_BOT_ID` environment variable as...well...your [GroupMe bot's](https://dev.groupme.com/tutorials/bots) ID, or the script will totter about like a fop and crash. For the full spreadsheet rent-tracking extravaganza, you'll need to set up [gspread](https://docs.gspread.org/en/latest/oauth2.html#service-account) and include the following environment variables:
 
 -   The URL to your spreadsheet under `RENTBOT_GSHEETS_URL`
 -   The API key to your spreadsheet under `RENTBOT_GSHEETS_KEY`
@@ -22,11 +22,10 @@ The bot needs to be hosted on a server and hooked up to Google Sheet it can writ
 In the repo's root directory, run the following terminal commands:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+uv sync
 ```
+
+> See here for instructions on [installing uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ### Running Tests
 
@@ -38,9 +37,9 @@ python -m pytest
 
 First, create a `.env` file in the repo root from the `example.env` template. Then run one of the following:
 
-**via Python**
+**via Python** (*doesn't work on Windows*)
 ```bash
-gunicorn app.app.main:app -b "0.0.0.0:5000"
+uv run gunicorn app.app.main:app -b "0.0.0.0:5000"
 ```
 
 **via Docker**
@@ -53,7 +52,5 @@ You can then send test messages to the app by running `python test/sendTestMsg.p
 ### Applying Linters
 
 ```bash
-autopep8 --in-place -r .
-isort .
-flake8 --exclude ".venv"
+uv run autopep8 --in-place -r . && uv run isort . && uv run flake8 --exclude ".venv"
 ```
