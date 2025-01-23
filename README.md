@@ -47,7 +47,7 @@ uv run fastapi run app/main.py --port 5000
 docker compose up
 ```
 
-You can then send test messages to the app by running `python test/sendTestMsg.py` in another window.
+You can then send test messages to the app by running `uv run poe test-msg` in another window.
 
 ### Applying Linters
 
