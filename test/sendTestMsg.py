@@ -1,5 +1,7 @@
 """Send a message to the local RentBot server to test if things are working."""
 
+import argparse
+
 import requests
 
 
@@ -11,5 +13,14 @@ def send_test_reminder():
     requests.get("http://localhost:5000/reminder")
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "msg", type=str, help="message to send to rentbot, e.g. '/rent help'"
+    )
+    args = parser.parse_args()
+    send_test_message(args.msg)
+
+
 if __name__ == "__main__":
-    send_test_message("/rent show")
+    main()

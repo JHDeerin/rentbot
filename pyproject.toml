@@ -24,3 +24,5 @@ _format = "ruff format"
 _isort = "isort ."
 _lint = "ruff check --fix"
 lint = ["_format", "_isort", "_lint"]
+
+test-msg = "python test/sendTestMsg.py"
