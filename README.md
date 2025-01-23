@@ -8,7 +8,7 @@ The bot can receive commands from a text chat (currently GroupMe), and based on 
 
 ## Deployment
 
-Standard GitHub Actions fare: make a push to the `main` branch, and let it deploy to Google Cloud Run. We also trigger a monthly rent reminder a [GitHub Action scheduler](https://devcenter.heroku.com/articles/scheduler) so we can have monthly rent reminders.
+Standard GitHub Actions fare: make a push to the `main` branch, and let it deploy to Google Cloud Run. We also trigger a monthly rent reminder via the [GCP Cloud Scheduler](https://console.cloud.google.com/cloudscheduler?hl=en&inv=1&invt=Abnkvw&project=groupme-rentbot) so we can have monthly rent reminders.
 
 The bot needs to be hosted on a server and hooked up to a Google Sheet it can write rents to. Make sure to define the `GROUPME_BOT_ID` environment variable as...well...your [GroupMe bot's](https://dev.groupme.com/tutorials/bots) ID, or the script will totter about like a fop and crash. For the full spreadsheet rent-tracking extravaganza, you'll need to set up [gspread](https://docs.gspread.org/en/latest/oauth2.html#service-account) and include the following environment variables:
 
