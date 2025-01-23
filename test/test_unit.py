@@ -10,53 +10,110 @@ googleSheetConnection = GoogleSheet()
 
 @pytest.fixture
 def unpaidSeptemberNoRentPosted() -> MonthData:
-    return MonthData(year=2021, month=9, totalRent=0.0, totalUtility=0.0, tenants={
-        'Mac Mathis': MonthlyTenant(name='Mac Mathis', weeksStayed=4.0, isPaid=False),
-        'Jake Deerin': MonthlyTenant(name='Jake Deerin', weeksStayed=4.0, isPaid=False),
-        'Taylor Daniel': MonthlyTenant(name='Taylor Daniel', weeksStayed=0.0, isPaid=False),
-        'Andrew Dallas': MonthlyTenant(name='Andrew Dallas', weeksStayed=0.0, isPaid=False),
-        'Andrew Wittenmyer': MonthlyTenant(name='Andrew Wittenmyer', weeksStayed=0.0, isPaid=False),
-        'Josh Minter': MonthlyTenant(name='Josh Minter', weeksStayed=4.0, isPaid=False),
-        'David Deerin': MonthlyTenant(name='David Deerin', weeksStayed=0.0, isPaid=False),
-        'Manny Jonson': MonthlyTenant(name='Manny Jonson', weeksStayed=4.0, isPaid=False)
-    })
+    return MonthData(
+        year=2021,
+        month=9,
+        totalRent=0.0,
+        totalUtility=0.0,
+        tenants={
+            "Mac Mathis": MonthlyTenant(
+                name="Mac Mathis", weeksStayed=4.0, isPaid=False
+            ),
+            "Jake Deerin": MonthlyTenant(
+                name="Jake Deerin", weeksStayed=4.0, isPaid=False
+            ),
+            "Taylor Daniel": MonthlyTenant(
+                name="Taylor Daniel", weeksStayed=0.0, isPaid=False
+            ),
+            "Andrew Dallas": MonthlyTenant(
+                name="Andrew Dallas", weeksStayed=0.0, isPaid=False
+            ),
+            "Andrew Wittenmyer": MonthlyTenant(
+                name="Andrew Wittenmyer", weeksStayed=0.0, isPaid=False
+            ),
+            "Josh Minter": MonthlyTenant(
+                name="Josh Minter", weeksStayed=4.0, isPaid=False
+            ),
+            "David Deerin": MonthlyTenant(
+                name="David Deerin", weeksStayed=0.0, isPaid=False
+            ),
+            "Manny Jonson": MonthlyTenant(
+                name="Manny Jonson", weeksStayed=4.0, isPaid=False
+            ),
+        },
+    )
 
 
 @pytest.fixture
 def partiallyPaidAugustRent() -> MonthData:
-    return MonthData(year=2021, month=8, totalRent=1697.0, totalUtility=413.18, tenants={
-        'Mac Mathis': MonthlyTenant(name='Mac Mathis', weeksStayed=4.0, isPaid=True),
-        'Jake Deerin': MonthlyTenant(name='Jake Deerin', weeksStayed=4.0, isPaid=True),
-        'Taylor Daniel': MonthlyTenant(name='Taylor Daniel', weeksStayed=2.0, isPaid=True),
-        'Andrew Dallas': MonthlyTenant(name='Andrew Dallas', weeksStayed=4.0, isPaid=True),
-        'Andrew Wittenmyer': MonthlyTenant(name='Andrew Wittenmyer', weeksStayed=2.0, isPaid=False),
-        'Josh Minter': MonthlyTenant(name='Josh Minter', weeksStayed=4.0, isPaid=True),
-        'David Deerin': MonthlyTenant(name='David Deerin', weeksStayed=1.0, isPaid=False),
-        'Manny Jonson': MonthlyTenant(name='Manny Jonson', weeksStayed=2.0, isPaid=False)
-    })
+    return MonthData(
+        year=2021,
+        month=8,
+        totalRent=1697.0,
+        totalUtility=413.18,
+        tenants={
+            "Mac Mathis": MonthlyTenant(
+                name="Mac Mathis", weeksStayed=4.0, isPaid=True
+            ),
+            "Jake Deerin": MonthlyTenant(
+                name="Jake Deerin", weeksStayed=4.0, isPaid=True
+            ),
+            "Taylor Daniel": MonthlyTenant(
+                name="Taylor Daniel", weeksStayed=2.0, isPaid=True
+            ),
+            "Andrew Dallas": MonthlyTenant(
+                name="Andrew Dallas", weeksStayed=4.0, isPaid=True
+            ),
+            "Andrew Wittenmyer": MonthlyTenant(
+                name="Andrew Wittenmyer", weeksStayed=2.0, isPaid=False
+            ),
+            "Josh Minter": MonthlyTenant(
+                name="Josh Minter", weeksStayed=4.0, isPaid=True
+            ),
+            "David Deerin": MonthlyTenant(
+                name="David Deerin", weeksStayed=1.0, isPaid=False
+            ),
+            "Manny Jonson": MonthlyTenant(
+                name="Manny Jonson", weeksStayed=2.0, isPaid=False
+            ),
+        },
+    )
 
 
 def testNoTotalRentHasNoCharges(unpaidSeptemberNoRentPosted):
-    expected = {'Mac Mathis': 0.0, 'Jake Deerin': 0.0, 'Taylor Daniel': 0.0, 'Andrew Dallas': 0.0,
-                'Andrew Wittenmyer': 0.0, 'Josh Minter': 0.0, 'David Deerin': 0.0, 'Manny Jonson': 0.0}
+    expected = {
+        "Mac Mathis": 0.0,
+        "Jake Deerin": 0.0,
+        "Taylor Daniel": 0.0,
+        "Andrew Dallas": 0.0,
+        "Andrew Wittenmyer": 0.0,
+        "Josh Minter": 0.0,
+        "David Deerin": 0.0,
+        "Manny Jonson": 0.0,
+    }
 
     monthAmountsOwed = googleSheetConnection._getAmountsOwedForMonth(
-        unpaidSeptemberNoRentPosted)
+        unpaidSeptemberNoRentPosted
+    )
     assert monthAmountsOwed == expected
 
 
 def testPartiallyPaidMonthCharges(partiallyPaidAugustRent):
-    expected = {'Andrew Wittenmyer': 183.49391304347824,
-                'David Deerin': 91.74695652173912, 'Manny Jonson': 183.49391304347824}
+    expected = {
+        "Andrew Wittenmyer": 183.49391304347824,
+        "David Deerin": 91.74695652173912,
+        "Manny Jonson": 183.49391304347824,
+    }
 
     monthAmountsOwed = googleSheetConnection._getAmountsOwedForMonth(
-        partiallyPaidAugustRent)
+        partiallyPaidAugustRent
+    )
     assert monthAmountsOwed == expected
 
 
 def testGettingTenantFromRemovalMsg():
-    input = '/rent remove  Andrew Wittenmyer'
-    expected = 'Andrew Wittenmyer'
+    input = "/rent remove  Andrew Wittenmyer"
+    expected = "Andrew Wittenmyer"
 
     cmd = RemoveCommand()
     tenant = cmd.getCommandedUser(input)
@@ -64,8 +121,8 @@ def testGettingTenantFromRemovalMsg():
 
 
 def testGettingTenantFromRemovalMsgWithAt():
-    input = '/rent remove  @Andrew Wittenmyer'
-    expected = 'Andrew Wittenmyer'
+    input = "/rent remove  @Andrew Wittenmyer"
+    expected = "Andrew Wittenmyer"
 
     cmd = RemoveCommand()
     tenant = cmd.getCommandedUser(input)
@@ -73,8 +130,8 @@ def testGettingTenantFromRemovalMsgWithAt():
 
 
 def testGettingTenantFromRemovalMsgWithoutUser():
-    input = '/rent remove '
-    expected = ''
+    input = "/rent remove "
+    expected = ""
 
     cmd = RemoveCommand()
     tenant = cmd.getCommandedUser(input)
@@ -82,8 +139,8 @@ def testGettingTenantFromRemovalMsgWithoutUser():
 
 
 def testGettingTenantFromAdditionMsg():
-    input = '/rent add  Andrew Wittenmyer'
-    expected = 'Andrew Wittenmyer'
+    input = "/rent add  Andrew Wittenmyer"
+    expected = "Andrew Wittenmyer"
 
     cmd = AddCommand()
     tenant = cmd.getCommandedUser(input)
@@ -91,8 +148,8 @@ def testGettingTenantFromAdditionMsg():
 
 
 def testGettingTenantFromAdditionMsgWithAt():
-    input = '/rent add  @Andrew Wittenmyer'
-    expected = 'Andrew Wittenmyer'
+    input = "/rent add  @Andrew Wittenmyer"
+    expected = "Andrew Wittenmyer"
 
     cmd = AddCommand()
     tenant = cmd.getCommandedUser(input)
@@ -100,8 +157,8 @@ def testGettingTenantFromAdditionMsgWithAt():
 
 
 def testGettingTenantFromAdditionMsgWithoutUser():
-    input = '/rent add '
-    expected = ''
+    input = "/rent add "
+    expected = ""
 
     cmd = AddCommand()
     tenant = cmd.getCommandedUser(input)
@@ -114,7 +171,7 @@ def testLoadingMonthDataWithCommaRent():
         ["Total Rent", "1,697.20"],
         ["Total Utility", "413.18"],
         ["Name", "Weeks Stayed", "Paid?"],
-        ["Mac Mathis", "4", "True"]
+        ["Mac Mathis", "4", "True"],
     ]
     # Prepend with 1 "month" of blank data as header padding
     for i in range(24):
@@ -122,9 +179,7 @@ def testLoadingMonthDataWithCommaRent():
 
     print(len(input))
     startTimestamp = datetime.datetime(
-        googleSheetConnection.START_YEAR,
-        googleSheetConnection.START_MONTH,
-        1
+        googleSheetConnection.START_YEAR, googleSheetConnection.START_MONTH, 1
     )
 
     monthData = googleSheetConnection._getMonthBlockData(input, startTimestamp)
@@ -141,7 +196,7 @@ def testMonthDataExistsReturnsFalseForMissingMonth():
         ["Total Rent", "1,697.20"],
         ["Total Utility", "413.18"],
         ["Name", "Weeks Stayed", "Paid?"],
-        ["Mac Mathis", "4", "True"]
+        ["Mac Mathis", "4", "True"],
     ]
     # Prepend with 1 "month" of blank data as header padding
     for i in range(24):
@@ -160,8 +215,7 @@ def testTryingToMarkNonExistentMonthAsPaidCausesException():
 
 
 def testTryingToRemoveTenantFromNonExistentMonthOkay():
-    googleSheetConnection.addTenant(
-        "Jake Deerin", datetime.datetime(2022, 9, 15))
+    googleSheetConnection.addTenant("Jake Deerin", datetime.datetime(2022, 9, 15))
 
     testDate = datetime.datetime(9999, 10, 1)
     googleSheetConnection.removeTenant("Jake Deerin", testDate)
@@ -169,10 +223,13 @@ def testTryingToRemoveTenantFromNonExistentMonthOkay():
 
 def testTenantRowsWithExtraDataOkay():
     testTenantRows = [
-        ['Mac Mathis', '4', 'True', ''], ['Jake Deerin', '4', 'True', 'blah']
+        ["Mac Mathis", "4", "True", ""],
+        ["Jake Deerin", "4", "True", "blah"],
     ]
     tenants = googleSheetConnection._getTenantsFromMonthRows(testTenantRows)
     assert tenants["Mac Mathis"] == MonthlyTenant(
-        name='Mac Mathis', weeksStayed=4.0, isPaid=True)
+        name="Mac Mathis", weeksStayed=4.0, isPaid=True
+    )
     assert tenants["Jake Deerin"] == MonthlyTenant(
-        name='Jake Deerin', weeksStayed=4.0, isPaid=True)
+        name="Jake Deerin", weeksStayed=4.0, isPaid=True
+    )

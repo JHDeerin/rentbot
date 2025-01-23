@@ -52,5 +52,5 @@ You can then send test messages to the app by running `python test/sendTestMsg.p
 ### Applying Linters
 
 ```bash
-uv run autopep8 --in-place -r . && uv run isort . && uv run flake8 --exclude ".venv"
+uv run poe lint
 ```

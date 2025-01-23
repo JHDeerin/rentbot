@@ -1,4 +1,5 @@
 """Fetch the bill amounts for the rent we owe this month from online."""
+
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -32,7 +33,8 @@ if __name__ == "__main__":
         time=datetime.fromisoformat("2023-10-09"),
         bill_sources=[
             # BillWebsite(login_url="https://centennialplaceapartments.securecafe.com/residentservices/centennial-place/userlogin.aspx#tab_PaymentAccounts", bill_url="https://centennialplaceapartments.securecafe.com/residentservices/centennial-place/payments.aspx#tab_RecentActivity")
-        ]
+        ],
     )
     print(
-        f"Total owed: ${bill.total_amt:.2f} (${bill.rent_amt:.2f} rent + ${bill.utility_amt:.2f})")
+        f"Total owed: ${bill.total_amt:.2f} (${bill.rent_amt:.2f} rent + ${bill.utility_amt:.2f})"
+    )
