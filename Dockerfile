@@ -15,4 +15,4 @@ ENV GROUPME_BOT_ID="<INSERT HERE>"
 ENV RENTBOT_GSHEETS_URL="<INSERT HERE>"
 ENV RENTBOT_GSHEETS_KEY_PATH="/tmp/gcp_key.json"
 
-CMD ["uv", "run", "gunicorn", "--conf", "app/gunicorn_conf.py", "--bind", "0.0.0.0:80", "app.main:app"]
+CMD ["uv", "run", "fastapi", "run", "app/main.py", "--port", "80"]

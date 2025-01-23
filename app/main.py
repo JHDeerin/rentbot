@@ -9,8 +9,9 @@ import re
 import traceback
 from datetime import datetime, timedelta
 
-import flask
+import fastapi
 import requests
+from pydantic import BaseModel
 
 from . import sheet
 from .sheet import GoogleSheet
@@ -44,7 +45,7 @@ If you need more info, you can poke around my insides here: https://github.com/J
 """
 
 
-app = flask.Flask(__name__)
+app = fastapi.FastAPI()
 googleSheetConnection = GoogleSheet()
 
 
@@ -267,11 +268,15 @@ class ShowCommand(BotCommand):
         sendBotMessage(BOT_ID, fullMessage)
 
 
-@app.route("/", methods=["POST"])
-def parseGroupMeMessage():
-    bodyJSON = flask.request.get_json()
-    msgText = bodyJSON["text"]
-    msgUser = bodyJSON["name"]
+class GroupMeMessage(BaseModel):
+    text: str
+    name: str
+
+
+@app.post("/")
+def parseGroupMeMessage(msg: GroupMeMessage):
+    msgText = msg.text
+    msgUser = msg.name
 
     if not BotCommand().isCommand(msgText):
         return "Not a Rentbot command", 200
@@ -308,7 +313,7 @@ def parseGroupMeMessage():
     return f'Unrecognized command "{msgText}"', 400
 
 
-@app.route("/reminder")
+@app.get("/reminder")
 def remindGroup():
     """
     Posts a reminder to pay the rent to the GroupMe
@@ -318,7 +323,3 @@ def remindGroup():
     print(f"Made sure month data exists for {getDefaultTimeForCommand().isoformat()}")
     sendBotMessage(BOT_ID, REMINDER_MESSAGE)
     return "Reminder message sent", 200
-
-
-if __name__ == "__main__":
-    app.run(threaded=True, port=5000)

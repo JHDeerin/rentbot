@@ -30,16 +30,16 @@ uv sync
 ### Running Tests
 
 ```bash
-python -m pytest
+uv run python -m pytest
 ```
 
 ### Running Server
 
 First, create a `.env` file in the repo root from the `example.env` template. Then run one of the following:
 
-**via Python** (*doesn't work on Windows*)
+**via Python**
 ```bash
-uv run gunicorn app.app.main:app -b "0.0.0.0:5000"
+uv run fastapi run app/main.py --port 5000
 ```
 
 **via Docker**
