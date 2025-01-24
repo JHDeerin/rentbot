@@ -11,10 +11,14 @@ from datetime import datetime, timedelta
 
 import fastapi
 import requests
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 from . import sheet
 from .sheet import GoogleSheet
+
+load_dotenv(override=True)
+
 
 TOKEN = os.environ.get("GROUPME_TOKEN")
 BOT_ID = os.environ["GROUPME_BOT_ID"]
