@@ -14,14 +14,16 @@ import requests
 from pydantic import BaseModel
 
 from . import sheet
+from .getRents import get_current_charges
 from .sheet import GoogleSheet
 
 TOKEN = os.environ.get("GROUPME_TOKEN")
 BOT_ID = os.environ["GROUPME_BOT_ID"]
+BOT_NAME = "RentBot"
 LANDLORD_GROUPME_NAME = "Jake Deerin"
 LANDLORD_VENMO = "https://venmo.com/Jake-Deerin"
 LANDLORD_PAYPAL = "https://paypal.me/jhdeerin"
-REMINDER_MESSAGE = f'It\'s RENT TIME again for the month!\n\nIn a few days, rents will be posted and you can type "/rent show" to see how much you owe @{LANDLORD_GROUPME_NAME}'
+REMINDER_MESSAGE = f'It\'s RENT TIME again for the month!\n\nIn a few minutes, rents will be posted and you can type "/rent show" to see how much you owe @{LANDLORD_GROUPME_NAME}'
 HELP_MESSAGE = """Hey! You can make me do things by typing "/rent <command name>" (without the quotes); here're the available commands:
 
 "/rent show"
@@ -62,7 +64,7 @@ def listGroups(token: str) -> str:
 def createBot(
     token: str,
     groupID: str = "52458108",
-    botName: str = "RentBot",
+    botName: str = BOT_NAME,
     imageURL: str = "https://p.kindpng.com/picc/s/47-476269_cute-clock-png-clip-art-for-kids-clipart.png",
 ):
     botCreationJSON = {
@@ -279,7 +281,7 @@ def parseGroupMeMessage(msg: GroupMeMessage):
     msgUser = msg.name
 
     if not BotCommand().isCommand(msgText):
-        return "Not a Rentbot command", 200
+        return "Not a RentBot command", 200
 
     print(f'Received message "{msgText}" from "{msgUser}"')
 
@@ -313,8 +315,30 @@ def parseGroupMeMessage(msg: GroupMeMessage):
     return f'Unrecognized command "{msgText}"', 400
 
 
+def _cents_to_dollar_str(cents: int) -> str:
+    return f"${cents / 100:.2f}"
+
+
+def _setCurrentRents():
+    print("Getting charges for the current month in the background")
+    charges = get_current_charges(verbose=True)
+    print("Got the charges; setting them now...")
+    rcmd = RentAmtCommand()
+    rcmd.execute(
+        userInput=f"/rent {rcmd.cmdName} {_cents_to_dollar_str(charges.rent_cents)}",
+        userName=BOT_NAME,
+    )
+    ucmd = UtilityAmtCommand()
+    ucmd.execute(
+        userInput=f"/rent {ucmd.cmdName} {_cents_to_dollar_str(charges.utilities_cents)}",
+        userName=BOT_NAME,
+    )
+    scmd = ShowCommand()
+    scmd.execute(userInput=f"/rent {scmd.cmdName}", userName=BOT_NAME)
+
+
 @app.get("/reminder")
-def remindGroup():
+def remindGroup(tasks: fastapi.BackgroundTasks):
     """
     Posts a reminder to pay the rent to the GroupMe
     """
@@ -322,4 +346,5 @@ def remindGroup():
     googleSheetConnection.createNewMonth(getDefaultTimeForCommand())
     print(f"Made sure month data exists for {getDefaultTimeForCommand().isoformat()}")
     sendBotMessage(BOT_ID, REMINDER_MESSAGE)
+    tasks.add_task(_setCurrentRents)
     return "Reminder message sent", 200
