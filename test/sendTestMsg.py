@@ -18,7 +18,15 @@ def main():
     parser.add_argument(
         "msg", type=str, help="message to send to rentbot, e.g. '/rent help'"
     )
+    parser.add_argument(
+        "--reminder",
+        action="store_true",
+        help="whether to trigger the 'reminder' action for rentbot",
+    )
     args = parser.parse_args()
+    if args.reminder:
+        send_test_reminder()
+        return
     send_test_message(args.msg)
 
 

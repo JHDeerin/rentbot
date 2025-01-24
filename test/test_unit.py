@@ -6,6 +6,8 @@ from app.main import AddCommand, RemoveCommand
 from app.sheet import GoogleSheet, MonthData, MonthlyTenant, MonthNotFoundError
 
 googleSheetConnection = GoogleSheet()
+googleSheetConnection.START_YEAR = 2021
+googleSheetConnection.START_MONTH = 8
 
 
 @pytest.fixture

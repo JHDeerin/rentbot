@@ -14,5 +14,6 @@ ENV GROUPME_BOT_ID="<INSERT HERE>"
 
 ENV RENTBOT_GSHEETS_URL="<INSERT HERE>"
 ENV RENTBOT_GSHEETS_KEY_PATH="/tmp/gcp_key.json"
+ENV RENTBOT_START_TIME="2021-08-01"
 
 CMD ["uv", "run", "fastapi", "run", "app/main.py", "--port", "80"]

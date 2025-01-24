@@ -10,6 +10,7 @@ import gspread
 SHEETS_KEY_PATH = os.environ.get("RENTBOT_GSHEETS_KEY_PATH")
 SHEETS_KEY = os.environ.get("RENTBOT_GSHEETS_KEY")
 SHEETS_URL = os.environ["RENTBOT_GSHEETS_URL"]
+RENTBOT_START_TIME = datetime.fromisoformat(os.environ["RENTBOT_START_TIME"])
 
 
 @dataclass
@@ -90,8 +91,8 @@ class GoogleSheet:
     """
 
     def __init__(self):
-        self.START_YEAR = 2021
-        self.START_MONTH = 8
+        self.START_YEAR = RENTBOT_START_TIME.year
+        self.START_MONTH = RENTBOT_START_TIME.month
         self.MAX_USERS = 20
         self.MONTH_BLOCK_SIZE = 25  # allocate 25 rows to each month
 
