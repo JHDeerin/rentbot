@@ -76,7 +76,7 @@ jobs:
             GEORGIA_POWER_PASSWORD=GEORGIA_POWER_PASSWORD:latest
             XFINITY_USERNAME=XFINITY_USERNAME:latest
             XFINITY_PASSWORD=XFINITY_PASSWORD:latest
-          env-vars: RENTBOT_START_TIME=2025-01-01
+          env_vars: RENTBOT_START_TIME=2021-08-01
           flags: |
             --service-account=rentbot-576mcafee-apt204@groupme-rentbot.iam.gserviceaccount.com
             --max-instances=1
