@@ -42,7 +42,7 @@ jobs:
           command: github-release
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/240990485203/locations/global/workloadIdentityPools/rentbot-github-actions/providers/github
           service_account: rentbot-deployment@groupme-rentbot.iam.gserviceaccount.com
@@ -61,12 +61,12 @@ jobs:
         run: docker push ${{ steps.docker-build.outputs.image }}
 
       - name: Deploy Docker image to GCP Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v0
+        uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ env.GCP_DOCKER_IMAGE }}
           image: ${{ steps.docker-build.outputs.image }}:latest
           region: ${{ env.GCP_REGION }}
-          secrets: |
+          secrets: |-
             GROUPME_BOT_ID=RENTBOT_GROUPME_ID_PROD:latest
             RENTBOT_GSHEETS_KEY=RENTBOT_GSHEETS_KEY_PROD:latest
             RENTBOT_GSHEETS_URL=RENTBOT_GSHEETS_URL_PROD:latest
@@ -76,7 +76,8 @@ jobs:
             GEORGIA_POWER_PASSWORD=GEORGIA_POWER_PASSWORD:latest
             XFINITY_USERNAME=XFINITY_USERNAME:latest
             XFINITY_PASSWORD=XFINITY_PASSWORD:latest
-          env_vars: RENTBOT_START_TIME=2021-08-01
+          env_vars: |-
+            RENTBOT_START_TIME=2021-08-01
           flags: |
             --service-account=rentbot-576mcafee-apt204@groupme-rentbot.iam.gserviceaccount.com
             --max-instances=1
