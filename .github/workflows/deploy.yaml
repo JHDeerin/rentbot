@@ -81,6 +81,6 @@ jobs:
           flags: |
             --service-account=rentbot-576mcafee-apt204@groupme-rentbot.iam.gserviceaccount.com
             --max-instances=1
-            --memory=1024Gi
+            --memory=1Gi
             --cpu=1
             --port=80
