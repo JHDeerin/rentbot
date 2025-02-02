@@ -28,4 +28,7 @@ ENV RENTBOT_GSHEETS_URL="<INSERT HERE>"
 ENV RENTBOT_GSHEETS_KEY_PATH="/tmp/gcp_key.json"
 ENV RENTBOT_START_TIME="2021-08-01"
 
+# Run to install Selenium browser/etc. dependencies
+RUN uv run python app/installSeleniumDrivers.py
+
 CMD ["uv", "run", "fastapi", "run", "app/main.py", "--port", "80"]

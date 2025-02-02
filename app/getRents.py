@@ -16,11 +16,11 @@ from typing import Any, Callable
 import pandas as pd
 import pandera as pa
 from pandera.typing import DataFrame, Series
-from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from seleniumbase import Driver
+
+from app.installSeleniumDrivers import get_driver
 
 APARTMENT_LOGIN_PAGE_URL = "https://centennialplaceapartments.securecafe.com/residentservices/centennial-place/userlogin.aspx"
 APARTMENT_USERNAME = os.environ["CENTENNIAL_APARTMENT_USERNAME"]
@@ -36,7 +36,6 @@ INTERNET_PASSWORD = os.environ["XFINITY_PASSWORD"]
 
 # Give lots of time because these sites are garbage slow
 HTTP_TIMEOUT_SECONDS = 60
-CHROMIUM_ARGS = "disable-extensions,disable-gpu,no-sandbox"
 
 
 class RecentCharges(pa.DataFrameModel):
@@ -158,7 +157,7 @@ def get_internet_recent_charges(
     login_page_url = INTERNET_LOGIN_PAGE_URL
 
     # initialize browser
-    driver: WebDriver = Driver(uc=True, headless=True, chromium_arg=CHROMIUM_ARGS)
+    driver = get_driver()
     driver.get(login_page_url)
 
     WebDriverWait(driver, HTTP_TIMEOUT_SECONDS).until(
@@ -250,7 +249,7 @@ def get_electricity_recent_charges(
     login_page_url = ELECTRICITY_LOGGING_PAGE_URL
 
     # initialize browser
-    driver: WebDriver = Driver(uc=True, headless=True, chromium_arg=CHROMIUM_ARGS)
+    driver = get_driver()
     driver.get(login_page_url)
     WebDriverWait(driver, HTTP_TIMEOUT_SECONDS).until(
         EC.presence_of_element_located((By.ID, "mat-input-0"))
@@ -302,7 +301,7 @@ def get_apartment_recent_charges(
 ) -> DataFrame[RecentCharges]:
     login_page_url = APARTMENT_LOGIN_PAGE_URL
     # initialize browser
-    driver = Driver(uc=True, headless=True, chromium_arg=CHROMIUM_ARGS)
+    driver = get_driver()
     driver.get(login_page_url)
 
     # log in via login page
