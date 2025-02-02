@@ -319,6 +319,12 @@ def _cents_to_dollar_str(cents: int) -> str:
     return f"${cents / 100:.2f}"
 
 
+def _getCurrentRents():
+    print("Getting charges for the current month in the background")
+    get_current_charges(verbose=True)
+    print("Got the charges")
+
+
 def _setCurrentRents():
     print("Getting charges for the current month in the background")
     charges = get_current_charges(verbose=True)
@@ -348,3 +354,14 @@ def remindGroup(tasks: fastapi.BackgroundTasks):
     sendBotMessage(BOT_ID, REMINDER_MESSAGE)
     tasks.add_task(_setCurrentRents)
     return "Reminder message sent", 200
+
+
+@app.get("/test/getRents")
+def testGetRents(tasks: fastapi.BackgroundTasks):
+    """
+    Tests getting the current rents in the background silently, i.e. without
+    sending any GroupMe messages
+    """
+    print("Received /test/getRents request")
+    tasks.add_task(_getCurrentRents)
+    return "Test initiated", 200
