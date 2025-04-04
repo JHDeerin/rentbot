@@ -3,7 +3,7 @@ services:
   web:
     build: .
     env_file:
-      - .env
+      - docker.env
     environment:
       - RENTBOT_GSHEETS_KEY_PATH=/tmp/gcp_key.json
     volumes:
