@@ -73,7 +73,7 @@ jobs:
           env_vars: |-
             RENTBOT_START_TIME=2021-08-01
             GROUPME_BOT_ID=${{ secrets.GROUPME_BOT_ID }}
-            RENTBOT_GSHEETS_KEY=${{ secrets.RENTBOT_GSHEETS_KEY }}
+            RENTBOT_GSHEETS_KEY='${{ secrets.RENTBOT_GSHEETS_KEY }}'
             RENTBOT_GSHEETS_URL=${{ secrets.RENTBOT_GSHEETS_URL }}
             CENTENNIAL_APARTMENT_USERNAME=${{ secrets.CENTENNIAL_APARTMENT_USERNAME }}
             GEORGIA_POWER_USERNAME=${{ secrets.GEORGIA_POWER_USERNAME }}
