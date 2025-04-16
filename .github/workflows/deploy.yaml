@@ -67,17 +67,17 @@ jobs:
           image: ${{ steps.docker-build.outputs.image }}:latest
           region: ${{ env.GCP_REGION }}
           secrets: |-
-            GROUPME_BOT_ID=RENTBOT_GROUPME_ID_PROD:latest
-            RENTBOT_GSHEETS_KEY=RENTBOT_GSHEETS_KEY_PROD:latest
-            RENTBOT_GSHEETS_URL=RENTBOT_GSHEETS_URL_PROD:latest
-            CENTENNIAL_APARTMENT_USERNAME=CENTENNIAL_APARTMENT_USERNAME:latest
             CENTENNIAL_APARTMENT_PASSWORD=CENTENNIAL_APARTMENT_PASSWORD:latest
-            GEORGIA_POWER_USERNAME=GEORGIA_POWER_USERNAME:latest
             GEORGIA_POWER_PASSWORD=GEORGIA_POWER_PASSWORD:latest
-            XFINITY_USERNAME=XFINITY_USERNAME:latest
             XFINITY_PASSWORD=XFINITY_PASSWORD:latest
           env_vars: |-
             RENTBOT_START_TIME=2021-08-01
+            GROUPME_BOT_ID=${{ secrets.GROUPME_BOT_ID }}
+            RENTBOT_GSHEETS_KEY=${{ secrets.RENTBOT_GSHEETS_KEY }}
+            RENTBOT_GSHEETS_URL=${{ secrets.RENTBOT_GSHEETS_URL }}
+            CENTENNIAL_APARTMENT_USERNAME=${{ secrets.CENTENNIAL_APARTMENT_USERNAME }}
+            GEORGIA_POWER_USERNAME=${{ secrets.GEORGIA_POWER_USERNAME }}
+            XFINITY_USERNAME=${{ secrets.XFINITY_USERNAME }}
           flags: |
             --service-account=rentbot-576mcafee-apt204@groupme-rentbot.iam.gserviceaccount.com
             --max-instances=1
