@@ -70,6 +70,7 @@ jobs:
             CENTENNIAL_APARTMENT_PASSWORD=CENTENNIAL_APARTMENT_PASSWORD:latest
             GEORGIA_POWER_PASSWORD=GEORGIA_POWER_PASSWORD:latest
             XFINITY_PASSWORD=XFINITY_PASSWORD:latest
+          secrets_update_strategy: overwrite
           env_vars: |-
             RENTBOT_START_TIME=2021-08-01
             GROUPME_BOT_ID=${{ secrets.GROUPME_BOT_ID }}
@@ -78,6 +79,7 @@ jobs:
             CENTENNIAL_APARTMENT_USERNAME=${{ secrets.CENTENNIAL_APARTMENT_USERNAME }}
             GEORGIA_POWER_USERNAME=${{ secrets.GEORGIA_POWER_USERNAME }}
             XFINITY_USERNAME=${{ secrets.XFINITY_USERNAME }}
+          env_vars_update_strategy: overwrite
           flags: |
             --service-account=rentbot-576mcafee-apt204@groupme-rentbot.iam.gserviceaccount.com
             --max-instances=1
