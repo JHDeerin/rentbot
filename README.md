@@ -51,3 +51,9 @@ You can then send test messages to the app by running `uv run poe test-msg` in a
 ```bash
 uv run poe lint
 ```
+
+> ## Notes to self (poor man's runbooks for my own use)
+>
+> ### Get charges for the month
+> 1. `docker compose up --build`
+> 2. In a separate tab, `curl localhost:5000/test/getRents` to print amounts owed (may take several minutes)

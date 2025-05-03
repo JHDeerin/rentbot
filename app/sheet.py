@@ -99,8 +99,10 @@ class GoogleSheet:
         if SHEETS_KEY:
             key = json.loads(SHEETS_KEY)
             self._connection = gspread.service_account_from_dict(key)
+            print("Loaded connection from dict")
         else:
             self._connection = gspread.service_account(filename=SHEETS_KEY_PATH)
+            print(f"Loaded connection from key path '{SHEETS_KEY_PATH}'")
         self._sheet = self._connection.open_by_url(SHEETS_URL)
         self._wksheet = self._sheet.sheet1
 

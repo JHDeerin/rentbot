@@ -159,27 +159,37 @@ def get_internet_recent_charges(
     # initialize browser
     driver = get_driver()
     driver.get(login_page_url)
+    print("Loaded page")
 
     WebDriverWait(driver, HTTP_TIMEOUT_SECONDS).until(
         EC.presence_of_element_located((By.ID, "user"))
     )
+    print("User page started")
 
     # log in via login page
     user = driver.find_element(By.ID, "user")
+    print("Found user element")
     user.send_keys(username)
+    print("Typed user")
 
     submit = driver.find_element(By.ID, "sign_in")
+    print("Found sign_in button")
     submit.click()
+    print("Clicked sign_in button")
 
     WebDriverWait(driver, HTTP_TIMEOUT_SECONDS).until(
         EC.presence_of_element_located((By.ID, "passwd"))
     )
+    print("Found passwd")
 
     passw = driver.find_element(By.ID, "passwd")
     passw.send_keys(password)
+    print("Typed passwd")
 
     submit = driver.find_element(By.ID, "sign_in")
+    print("Found sign_in button")
     submit.click()
+    print("Clicked sign_in button")
 
     # wait for page to load
     WebDriverWait(driver, HTTP_TIMEOUT_SECONDS).until(
