@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from app.main import AddCommand, RemoveCommand
+from app.main import AddCommand, PaidCommand, RemoveCommand
 from app.sheet import GoogleSheet, MonthData, MonthlyTenant, MonthNotFoundError
 
 googleSheetConnection = GoogleSheet()
@@ -136,6 +136,33 @@ def testGettingTenantFromRemovalMsgWithoutUser():
     expected = ""
 
     cmd = RemoveCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromPaidMsg():
+    input = "/rent paid  Andrew Wittenmyer"
+    expected = "Andrew Wittenmyer"
+
+    cmd = PaidCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromPaidMsgWithAt():
+    input = "/rent paid  @Andrew Wittenmyer"
+    expected = "Andrew Wittenmyer"
+
+    cmd = PaidCommand()
+    tenant = cmd.getCommandedUser(input)
+    assert tenant == expected
+
+
+def testGettingTenantFromPaidMsgWithoutUser():
+    input = "/rent paid"
+    expected = ""
+
+    cmd = PaidCommand()
     tenant = cmd.getCommandedUser(input)
     assert tenant == expected
 

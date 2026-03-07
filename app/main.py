@@ -30,8 +30,8 @@ HELP_MESSAGE = """Hey! You can make me do things by typing "/rent <command name>
     Show how much everyone owes right now + how to pay
 "/rent weeks-stayed <num weeks>"
     (Deprecated) Mark how long you've stayed this month, e.g. "/rent weeks-stayed 4"
-"/rent paid"
-    Mark that you've paid this month's rent
+"/rent paid <GroupMe user name>"
+    Mark that someone (you, by default) has paid this month's rent
 "/rent add <GroupMe user name>"
     Add someone new (you, by default) to pay the rent
 "/rent remove <GroupMe user name>"
@@ -156,21 +156,32 @@ class RemoveCommand(BotCommand):
 class PaidCommand(BotCommand):
     def __init__(self):
         super().__init__(cmdName="paid")
-        self.parseCostRegex = re.compile(f"{self.cmdRegex.pattern}\s+()(\d*\.?\d+)")
+        self.userNameRegex = re.compile(f"{self.cmdRegex.pattern}\s+@?(.+)")
+
+    def getCommandedUser(self, userInput: str) -> str:
+        matches = self.userNameRegex.search(userInput)
+        if not matches:
+            return ""
+
+        user = matches.group(1)
+        return user
 
     def execute(self, userInput: str, userName: str = ""):
+        userToPay = self.getCommandedUser(userInput)
+        if not userToPay:
+            userToPay = userName
         time = getDefaultTimeForCommand()
         try:
-            googleSheetConnection.markRentAsPaid(userName, time)
+            googleSheetConnection.markRentAsPaid(userToPay, time)
         except sheet.MonthNotFoundError:
             # Try going backwards 1 month; maybe the current month's data isn't
             # available yet and they intended to pay for the last month
             # TODO: Find a more robust/general solution, like specifying the
             # month you want to pay for
             time = time - timedelta(days=30)
-            googleSheetConnection.markRentAsPaid(userName, time)
+            googleSheetConnection.markRentAsPaid(userToPay, time)
         monthStr = time.strftime("%B")
-        sendBotMessage(BOT_ID, f"@{userName} paid the rent for {monthStr} {time.year}")
+        sendBotMessage(BOT_ID, f"@{userToPay} paid the rent for {monthStr} {time.year}")
 
 
 class RentAmtCommand(BotCommand):
