@@ -84,9 +84,10 @@ def sendBotMessage(botID: str, message: str):
 def getDefaultTimeForCommand() -> datetime:
     """
     Returns the default time you should use for the current command (basically
-    2 weeks ago, but you should only use the year/month to make decisions)
+    last month, but you should only use the year/month to make decisions)
     """
-    time = datetime.utcnow() - timedelta(days=14)
+    # TODO: Use a more robust way to get the previous month
+    time = datetime.utcnow() - timedelta(days=28)
     return time
 
 
@@ -178,7 +179,7 @@ class PaidCommand(BotCommand):
             # available yet and they intended to pay for the last month
             # TODO: Find a more robust/general solution, like specifying the
             # month you want to pay for
-            time = time - timedelta(days=30)
+            time = time - timedelta(days=28)
             googleSheetConnection.markRentAsPaid(userToPay, time)
         monthStr = time.strftime("%B")
         sendBotMessage(BOT_ID, f"@{userToPay} paid the rent for {monthStr} {time.year}")
