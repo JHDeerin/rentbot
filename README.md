@@ -56,4 +56,4 @@ uv run poe lint
 >
 > ### Get charges for the month
 > 1. `docker compose up --build`
-> 2. In a separate tab, `curl localhost:5000/test/getRents` to print amounts owed (may take several minutes)
+> 2. In a separate tab, `curl 127.0.0.1:5000/test/getRents` to print amounts owed in server logs (may take several minutes)

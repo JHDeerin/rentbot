@@ -140,3 +140,4 @@ cython_debug/
 # custom
 docker.env
 downloaded_files/
+.claude
